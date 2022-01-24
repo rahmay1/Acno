@@ -9,6 +9,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:acne_detector/com/request.dart';
 import 'dart:math' as math;
 import 'dart:io';
+import 'package:acne_detector/camera/camera.dart';
+import 'package:acne_detector/camera/capture.dart';
+import 'package:acne_detector/camera/preview.dart';
+import 'package:camera/camera.dart';
+
+List<CameraDescription> cameras = [];
 
 class RootApp extends StatefulWidget {
   const RootApp({Key? key}) : super(key: key);
@@ -30,8 +36,8 @@ class _RootAppState extends State<RootApp> {
               title: Text("Select the image source"),
               actions: <Widget>[
                 MaterialButton(
-                  child: Text("Camera"),
-                  onPressed: () => Navigator.pop(context, ImageSource.camera)
+                    child: Text("Camera"),
+                    onPressed: () => Navigator.pop(context, ImageSource.camera)
                 ),
                 MaterialButton(
                   child: Text("Gallery"),
@@ -48,6 +54,25 @@ class _RootAppState extends State<RootApp> {
         setState(() => _pickedImage = File( file.path ));
       }
     }
+  }
+
+  Future<void> _initCamera() async {
+    // Fetch the available cameras before initializing the app.
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      cameras = await availableCameras();
+    } on CameraException catch (e) {
+      print('Error in fetching the cameras: $e');
+    }
+  }
+
+  void runCamera() {
+    _initCamera().then((i) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CameraScreen()),);
+    });
+
   }
 
   @override
@@ -171,8 +196,9 @@ class _RootAppState extends State<RootApp> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _pickedImage == null ? _pickImage() : main([""], _pickedImage as File);
-          activeTab = 2;
+          //_pickedImage == null ? _pickImage() : main([""], _pickedImage as File);
+          runCamera();
+          //activeTab = 2;
         });
       },
       child: Transform.rotate(
