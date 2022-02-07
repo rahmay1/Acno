@@ -15,7 +15,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: white,
       appBar:
-      PreferredSize(child: getAppBar(), preferredSize: Size.fromHeight(0)),
+      PreferredSize(child: getAppBar(), preferredSize: const Size.fromHeight(0)),
       body: getBody(),
     );
   }
@@ -34,14 +34,14 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
-            Text(
+            const Text(
               "Acne Types",
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Container(
@@ -55,23 +55,23 @@ class _ChatPageState extends State<ChatPage> {
                         color: grey.withOpacity(0.2),
                         spreadRadius: 2,
                         blurRadius: 15,
-                        offset: Offset(0, 1))
+                        offset: const Offset(0, 1))
                   ]),
               child: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   ),
                   IconButton(
                       onPressed: () {},
-                      icon: Icon(
+                      icon: const Icon(
                         Feather.search,
                         color: black,
                       )),
-                  SizedBox(
+                  const SizedBox(
                     width: 5,
                   ),
-                  Flexible(
+                  const Flexible(
                     child: TextField(
                       cursorColor: black,
                       decoration: InputDecoration(
@@ -82,7 +82,7 @@ class _ChatPageState extends State<ChatPage> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 40,
             ),
             Column(

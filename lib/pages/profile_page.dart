@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:acne_detector/theme/colors.dart';
-import 'package:video_player/video_player.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -16,7 +14,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: white,
       appBar: PreferredSize(
-          child: getAppBar(), preferredSize: Size.fromHeight(0)),
+          child: getAppBar(), preferredSize: const Size.fromHeight(0)),
       body: getBody(),
     );
   }
@@ -29,21 +27,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget getBody() {
-    var size = MediaQuery.of(context).size;
+    //var size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.only(left: 25, right: 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
-            Text(
+            const Text(
               "Profile Page",
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Wrap(

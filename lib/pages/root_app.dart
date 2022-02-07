@@ -6,26 +6,26 @@ import 'package:acne_detector/pages/profile_page.dart';
 import 'package:acne_detector/pages/saved_page.dart';
 import 'package:acne_detector/theme/colors.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:acne_detector/com/request.dart';
 import 'dart:math' as math;
 import 'dart:io';
 import 'package:acne_detector/camera/camera.dart';
-import 'package:acne_detector/camera/capture.dart';
-import 'package:acne_detector/camera/preview.dart';
 import 'package:camera/camera.dart';
 
 List<CameraDescription> cameras = [];
 
 class RootApp extends StatefulWidget {
-  const RootApp({Key? key}) : super(key: key);
+  //const RootApp({Key? key}) : super(key: key);
+
+  final File? image;
+
+  const RootApp({this.image});
 
   @override
   _RootAppState createState() => _RootAppState();
 }
 
-
 class _RootAppState extends State<RootApp> {
-  int activeTab = 0;
+  int activeTab = 2;
   File? _pickedImage;
 
   void _pickImage() async {
@@ -33,14 +33,14 @@ class _RootAppState extends State<RootApp> {
         context: context,
         builder: (context) =>
             AlertDialog(
-              title: Text("Select the image source"),
+              title: const Text("Select the image source"),
               actions: <Widget>[
                 MaterialButton(
-                    child: Text("Camera"),
+                    child: const Text("Camera"),
                     onPressed: () => Navigator.pop(context, ImageSource.camera)
                 ),
                 MaterialButton(
-                  child: Text("Gallery"),
+                  child: const Text("Gallery"),
                   onPressed: () => Navigator.pop(context, ImageSource.gallery),
                 )
               ],
@@ -48,8 +48,7 @@ class _RootAppState extends State<RootApp> {
     );
 
     if(imageSource != null) {
-      ImagePicker i = new ImagePicker();
-      final file = await i.pickImage(source: imageSource);
+      final file = await ImagePicker.pickImage(source: imageSource);
       if(file != null) {
         setState(() => _pickedImage = File( file.path ));
       }
@@ -90,15 +89,15 @@ class _RootAppState extends State<RootApp> {
     return IndexedStack(
       index: activeTab,
       children: [
-        HomePage(),
-        ChatPage(),
+        const HomePage(),
+        const ChatPage(),
         Center(
-          child: _pickedImage == null ?
-          Text("No Image") :
-          Image(image: FileImage(_pickedImage as File)),
+          child: widget.image == null ?
+          const Text("No Image") :
+          Image(image: FileImage(widget.image as File)),
         ),
-        SavedPage(),
-        ProfilePage()
+        const SavedPage(),
+        const ProfilePage()
       ],
     );
   }
@@ -113,7 +112,7 @@ class _RootAppState extends State<RootApp> {
               color: grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 20,
-              offset: Offset(0, 1)),
+              offset: const Offset(0, 1)),
         ],
         borderRadius: BorderRadius.circular(20),
         color: white,
@@ -138,7 +137,7 @@ class _RootAppState extends State<RootApp> {
                     color: activeTab == 0 ? primary : black,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 55,
                 ),
                 GestureDetector(
@@ -148,7 +147,7 @@ class _RootAppState extends State<RootApp> {
                     });
                   },
                   child: Icon(
-                    IconData(58311, fontFamily: 'MaterialIcons'),
+                    const IconData(58311, fontFamily: 'MaterialIcons'),
                     size: 30,
                     color: activeTab == 1 ? primary : black,
                   ),
@@ -164,12 +163,12 @@ class _RootAppState extends State<RootApp> {
                     });
                   },
                   child: Icon(
-                    IconData(57702, fontFamily: 'MaterialIcons'),
+                    const IconData(57702, fontFamily: 'MaterialIcons'),
                     size: 28,
                     color: activeTab == 3 ? primary : black,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 55,
                 ),
                 GestureDetector(
@@ -211,14 +210,14 @@ class _RootAppState extends State<RootApp> {
                 color: grey.withOpacity(0.3),
                 spreadRadius: 2,
                 blurRadius: 15,
-                offset: Offset(0, 1)),
+                offset: const Offset(0, 1)),
           ], color: _pickedImage == null ? black : green
               , borderRadius: BorderRadius.circular(23)),
           child: Transform.rotate(
             angle: math.pi / 4,
             child: Center(
                 child: Icon(
-                  _pickedImage == null ? Ionicons.md_add_circle : IconData(61533, fontFamily: 'MaterialIcons'),
+                  _pickedImage == null ? Ionicons.md_add_circle : const IconData(61533, fontFamily: 'MaterialIcons'),
                   color: white,
                   size: _pickedImage == null ? 35:50,
                 )),

@@ -3,12 +3,11 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:acne_detector/camera/preview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:acne_detector/pages/root_app.dart';
-
-import '../main.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -21,21 +20,12 @@ class _CameraScreenState extends State<CameraScreen>
   VideoPlayerController? videoController;
 
   File? _imageFile;
-  File? _videoFile;
 
   // Initial values
   bool _isCameraInitialized = false;
   bool _isRearCameraSelected = true;
-  bool _isVideoCameraSelected = false;
-  bool _isRecordingInProgress = false;
-  double _minAvailableExposureOffset = 0.0;
-  double _maxAvailableExposureOffset = 0.0;
-  double _minAvailableZoom = 1.0;
-  double _maxAvailableZoom = 1.0;
 
   // Current values
-  double _currentZoomLevel = 1.0;
-  double _currentExposureOffset = 0.0;
   FlashMode? _currentFlashMode;
 
   List<File> allFileList = [];
@@ -50,27 +40,29 @@ class _CameraScreenState extends State<CameraScreen>
     allFileList.clear();
     List<Map<int, dynamic>> fileNames = [];
 
-    fileList.forEach((file) {
-      if (file.path.contains('.jpg') || file.path.contains('.mp4')) {
+    for (var file in fileList) {
+      if (file.path.contains('.jpg')) {
         allFileList.add(File(file.path));
 
         String name = file.path.split('/').last.split('.').first;
         fileNames.add({0: int.parse(name), 1: file.path.split('/').last});
       }
-    });
+    }
 
     if (fileNames.isNotEmpty) {
       final recentFile =
       fileNames.reduce((curr, next) => curr[0] > next[0] ? curr : next);
       String recentFileName = recentFile[1];
-      if (recentFileName.contains('.mp4')) {
-        _videoFile = File('${directory.path}/$recentFileName');
-        _imageFile = null;
-        _startVideoPlayer();
-      } else {
-        _imageFile = File('${directory.path}/$recentFileName');
-        _videoFile = null;
-      }
+
+      _imageFile = File('${directory.path}/$recentFileName');
+
+      // CHANGED CODE BELOW_________________________________________________________________
+      ImageProperties properties = await FlutterNativeImage.getImageProperties('${directory.path}/$recentFileName');
+      int originX = properties.width! ~/ 2;
+      int originY = properties.height! ~/ 2;
+      _imageFile = await FlutterNativeImage.cropImage('${directory.path}/$recentFileName', 500, 500, 500, 500);
+      // _________________________________________________________________
+
 
       setState(() {});
     }
@@ -93,87 +85,6 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  Future<void> _startVideoPlayer() async {
-    if (_videoFile != null) {
-      videoController = VideoPlayerController.file(_videoFile!);
-      await videoController!.initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized,
-        // even before the play button has been pressed.
-        setState(() {});
-      });
-      await videoController!.setLooping(true);
-      await videoController!.play();
-    }
-  }
-
-  Future<void> startVideoRecording() async {
-    final CameraController? cameraController = controller;
-
-    if (controller!.value.isRecordingVideo) {
-      // A recording has already started, do nothing.
-      return;
-    }
-
-    try {
-      await cameraController!.startVideoRecording();
-      setState(() {
-        _isRecordingInProgress = true;
-        print(_isRecordingInProgress);
-      });
-    } on CameraException catch (e) {
-      print('Error starting to record video: $e');
-    }
-  }
-
-  Future<XFile?> stopVideoRecording() async {
-    if (!controller!.value.isRecordingVideo) {
-      // Recording is already is stopped state
-      return null;
-    }
-
-    try {
-      XFile file = await controller!.stopVideoRecording();
-      setState(() {
-        _isRecordingInProgress = false;
-      });
-      return file;
-    } on CameraException catch (e) {
-      print('Error stopping video recording: $e');
-      return null;
-    }
-  }
-
-  Future<void> pauseVideoRecording() async {
-    if (!controller!.value.isRecordingVideo) {
-      // Video recording is not in progress
-      return;
-    }
-
-    try {
-      await controller!.pauseVideoRecording();
-    } on CameraException catch (e) {
-      print('Error pausing video recording: $e');
-    }
-  }
-
-  Future<void> resumeVideoRecording() async {
-    if (!controller!.value.isRecordingVideo) {
-      // No video recording was in progress
-      return;
-    }
-
-    try {
-      await controller!.resumeVideoRecording();
-    } on CameraException catch (e) {
-      print('Error resuming video recording: $e');
-    }
-  }
-
-  void resetCameraValues() async {
-    _currentZoomLevel = 1.0;
-    _currentExposureOffset = 0.0;
-  }
-
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     final previousCameraController = controller;
 
@@ -184,8 +95,6 @@ class _CameraScreenState extends State<CameraScreen>
     );
 
     await previousCameraController?.dispose();
-
-    resetCameraValues();
 
     if (mounted) {
       setState(() {
@@ -200,20 +109,6 @@ class _CameraScreenState extends State<CameraScreen>
 
     try {
       await cameraController.initialize();
-      await Future.wait([
-        cameraController
-            .getMinExposureOffset()
-            .then((value) => _minAvailableExposureOffset = value),
-        cameraController
-            .getMaxExposureOffset()
-            .then((value) => _maxAvailableExposureOffset = value),
-        cameraController
-            .getMaxZoomLevel()
-            .then((value) => _maxAvailableZoom = value),
-        cameraController
-            .getMinZoomLevel()
-            .then((value) => _minAvailableZoom = value),
-      ]);
 
       _currentFlashMode = controller!.value.flashMode;
     } on CameraException catch (e) {
@@ -230,7 +125,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     // Hide the status bar in Android
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     // Set and initialize the new camera
     onNewCameraSelected(cameras[0]);
     refreshAlreadyCapturedImages();
@@ -274,7 +169,7 @@ class _CameraScreenState extends State<CameraScreen>
                 children: [
                   controller!.buildPreview(),
                   cameraOverlay(
-                      padding: 50, aspectRatio: 1, color: Color(0x55000000)),
+                      padding: 50, aspectRatio: 1, color: const Color(0x55000000)),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(
                       16.0,
@@ -310,7 +205,7 @@ class _CameraScreenState extends State<CameraScreen>
                                             .toString()
                                             .split('.')[1]
                                             .toUpperCase(),
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                             color: Colors.white),
                                       ),
                                       value: preset,
@@ -324,105 +219,26 @@ class _CameraScreenState extends State<CameraScreen>
                                   onNewCameraSelected(
                                       controller!.description);
                                 },
-                                hint: Text("Select item"),
+                                hint: const Text("Select item"),
                               ),
                             ),
                           ),
                         ),
                         // Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              right: 8.0, top: 16.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                _currentExposureOffset
-                                    .toStringAsFixed(1) +
-                                    'x',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ),
-                        ),
                         Expanded(
                           child: RotatedBox(
                             quarterTurns: 3,
                             child: Container(
                               height: 30,
-                              child: Slider(
-                                value: _currentExposureOffset,
-                                min: _minAvailableExposureOffset,
-                                max: _maxAvailableExposureOffset,
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.white30,
-                                onChanged: (value) async {
-                                  setState(() {
-                                    _currentExposureOffset = value;
-                                  });
-                                  await controller!
-                                      .setExposureOffset(value);
-                                },
-                              ),
                             ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Slider(
-                                value: _currentZoomLevel,
-                                min: _minAvailableZoom,
-                                max: _maxAvailableZoom,
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.white30,
-                                onChanged: (value) async {
-                                  setState(() {
-                                    _currentZoomLevel = value;
-                                  });
-                                  await controller!.setZoomLevel(value);
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.black87,
-                                  borderRadius:
-                                  BorderRadius.circular(10.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    _currentZoomLevel.toStringAsFixed(1) +
-                                        'x',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                         Row(
                           mainAxisAlignment:
                           MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
-                              onTap: _isRecordingInProgress
-                                  ? () async {
-                                if (controller!
-                                    .value.isRecordingPaused) {
-                                  await resumeVideoRecording();
-                                } else {
-                                  await pauseVideoRecording();
-                                }
-                              }
-                                  : () {
+                              onTap: () {
                                 setState(() {
                                   _isCameraInitialized = false;
                                 });
@@ -436,25 +252,12 @@ class _CameraScreenState extends State<CameraScreen>
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.circle,
                                     color: Colors.black38,
                                     size: 60,
                                   ),
-                                  _isRecordingInProgress
-                                      ? controller!
-                                      .value.isRecordingPaused
-                                      ? Icon(
-                                    Icons.play_arrow,
-                                    color: Colors.white,
-                                    size: 30,
-                                  )
-                                      : Icon(
-                                    Icons.pause,
-                                    color: Colors.white,
-                                    size: 30,
-                                  )
-                                      : Icon(
+                                  Icon(
                                     _isRearCameraSelected
                                         ? Icons.camera_front
                                         : Icons.camera_rear,
@@ -465,34 +268,7 @@ class _CameraScreenState extends State<CameraScreen>
                               ),
                             ),
                             InkWell(
-                              onTap: _isVideoCameraSelected
-                                  ? () async {
-                                if (_isRecordingInProgress) {
-                                  XFile? rawVideo =
-                                  await stopVideoRecording();
-                                  File videoFile =
-                                  File(rawVideo!.path);
-
-                                  int currentUnix = DateTime.now()
-                                      .millisecondsSinceEpoch;
-
-                                  final directory =
-                                  await getApplicationDocumentsDirectory();
-
-                                  String fileFormat = videoFile.path
-                                      .split('.')
-                                      .last;
-
-                                  _videoFile = await videoFile.copy(
-                                    '${directory.path}/$currentUnix.$fileFormat',
-                                  );
-
-                                  _startVideoPlayer();
-                                } else {
-                                  await startVideoRecording();
-                                }
-                              }
-                                  : () async {
+                              onTap: () async {
                                 XFile? rawImage =
                                 await takePicture();
                                 File imageFile =
@@ -518,41 +294,40 @@ class _CameraScreenState extends State<CameraScreen>
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.circle,
-                                    color: _isVideoCameraSelected
-                                        ? Colors.white
-                                        : Colors.white38,
+                                    color: Colors.white38,
                                     size: 80,
                                   ),
-                                  Icon(
+                                  const Icon(
                                     Icons.circle,
-                                    color: _isVideoCameraSelected
-                                        ? Colors.red
-                                        : Colors.white,
+                                    color: Colors.white,
                                     size: 65,
                                   ),
-                                  _isVideoCameraSelected &&
-                                      _isRecordingInProgress
-                                      ? Icon(
-                                    Icons.stop_rounded,
-                                    color: Colors.white,
-                                    size: 32,
-                                  )
-                                      : Container(),
+                                  Container(),
                                 ],
                               ),
                             ),
                             InkWell(
                               onTap:
-                              _imageFile != null || _videoFile != null
-                                  ? () {
+                              _imageFile != null
+                                  ? () async {
+                                //ImageProperties properties = await FlutterNativeImage.getImageProperties((_imageFile as File).path);
+
+                                // File? croppedImage = await ImageCropper.cropImage(
+                                //   sourcePath: (_imageFile as File).path,
+                                //   aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+                                //   compressQuality: 100,
+                                //   maxHeight: 500,
+                                //   maxWidth: 500,
+                                //   compressFormat: ImageCompressFormat.jpg,
+                                // );
+
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        PreviewScreen(
-                                          imageFile: _imageFile!,
-                                          fileList: allFileList,
+                                        RootApp(
+                                          image: _imageFile,
                                         ),
                                   ),
                                 );
@@ -603,69 +378,9 @@ class _CameraScreenState extends State<CameraScreen>
             ),
             Expanded(
               child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8.0,
-                                right: 4.0,
-                              ),
-                              child: TextButton(
-                                onPressed: _isRecordingInProgress
-                                    ? null
-                                    : () {
-                                  if (_isVideoCameraSelected) {
-                                    setState(() {
-                                      _isVideoCameraSelected =
-                                      false;
-                                    });
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                  primary: _isVideoCameraSelected
-                                      ? Colors.black54
-                                      : Colors.black,
-                                  backgroundColor: _isVideoCameraSelected
-                                      ? Colors.white30
-                                      : Colors.white,
-                                ),
-                                child: Text('IMAGE'),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 4.0, right: 8.0),
-                              child: TextButton(
-                                onPressed: () {
-                                  if (!_isVideoCameraSelected) {
-                                    setState(() {
-                                      _isVideoCameraSelected = true;
-                                    });
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                  primary: _isVideoCameraSelected
-                                      ? Colors.black
-                                      : Colors.black54,
-                                  backgroundColor: _isVideoCameraSelected
-                                      ? Colors.white
-                                      : Colors.white30,
-                                ),
-                                child: Text('VIDEO'),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                     Padding(
                       padding:
                       const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
@@ -745,7 +460,7 @@ class _CameraScreenState extends State<CameraScreen>
             ),
           ],
         )
-            : Center(
+            : const Center(
           child: Text(
             'LOADING',
             style: TextStyle(color: Colors.white),
@@ -765,12 +480,12 @@ Widget cameraOverlay({double? padding, double? aspectRatio, Color?color}) {
     if (parentAspectRatio < (aspectRatio as double)) {
       horizontalPadding = (padding as double);
       verticalPadding = (constraints.maxHeight -
-          ((constraints.maxWidth - 2 * (padding as double)) / (aspectRatio as double))) /
+          ((constraints.maxWidth - 2 * (padding)) / (aspectRatio))) /
           2;
     } else {
       verticalPadding = padding as double;
       horizontalPadding = (constraints.maxWidth -
-          ((constraints.maxHeight - 2 * (padding as double)) * (aspectRatio as double))) /
+          ((constraints.maxHeight - 2 * (padding)) * (aspectRatio))) /
           2;
     }
     return Stack(fit: StackFit.expand, children: [

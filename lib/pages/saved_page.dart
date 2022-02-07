@@ -14,7 +14,7 @@ class _SavedPageState extends State<SavedPage> {
     return Scaffold(
       backgroundColor: white,
       appBar:
-      PreferredSize(child: getAppBar(), preferredSize: Size.fromHeight(0)),
+      PreferredSize(child: getAppBar(), preferredSize: const Size.fromHeight(0)),
       body: getBody(),
     );
   }
@@ -27,21 +27,21 @@ class _SavedPageState extends State<SavedPage> {
   }
 
   Widget getBody() {
-    var size = MediaQuery.of(context).size;
+    //var size = MediaQuery.of(context).size;
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.only(left: 25, right: 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
-            Text(
+            const Text(
               "Acne Treatment",
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Wrap(
