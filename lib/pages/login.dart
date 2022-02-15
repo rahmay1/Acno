@@ -18,9 +18,11 @@ class LoginPage extends StatefulWidget{
 class _LoginPage extends State<LoginPage>{
   String? errormsg;
   bool? error, showprogress;
-  String? username, password;
+  String? username, password, email;
+  bool SignupOrLogin = true;
 
   final TextEditingController _username = TextEditingController();
+  final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
   startLogin() async {
@@ -78,10 +80,66 @@ class _LoginPage extends State<LoginPage>{
     }
   }
 
+  startSignup() async {
+
+    String apiurl = "http://10.0.2.2:8000/login.php"; //api url
+    //dont use http://localhost , because emulator don't get that address
+    //insted use your local IP address or use live URL
+    //hit "ipconfig" in windows or "ip a" in linux to get you local IP
+    print(username);
+
+    var response = await http.post(Uri.parse(apiurl), body: {
+      'username': username, //get the username text
+      'password': password  //get password text
+    });
+
+    if(response.statusCode == 200){
+      var jsondata = json.decode(response.body);
+      if(jsondata["error"]){
+        setState(() {
+          showprogress = false; //don't show progress indicator
+          error = true;
+          errormsg = jsondata["message"];
+        });
+      }else{
+        if(jsondata["success"]){
+          setState(() {
+            error = false;
+            showprogress = false;
+          });
+          //save the data returned from server
+          //and navigate to home page
+          String uid = jsondata["uid"];
+          String fullname = jsondata["fullname"];
+          String address = jsondata["address"];
+          print(fullname);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+              const RootApp(),
+            ),
+          );
+          //user shared preference to save data
+        }else{
+          showprogress = false; //don't show progress indicator
+          error = true;
+          errormsg = "Something went wrong.";
+        }
+      }
+    }else{
+      setState(() {
+        showprogress = false; //don't show progress indicator
+        error = true;
+        errormsg = "Error during connecting to server.";
+      });
+    }
+  }
+
   @override
   void initState() {
     username = "";
     password = "";
+    email = "";
     errormsg = "";
     error = false;
     showprogress = false;
@@ -123,14 +181,18 @@ class _LoginPage extends State<LoginPage>{
 
               Container(
                 margin: const EdgeInsets.only(top:80),
-                child: const Text("Sign Into System", style: TextStyle(
+                child: SignupOrLogin ? const Text("Sign up System", style: TextStyle(
+                    color:Colors.white,fontSize: 40, fontWeight: FontWeight.bold
+                ),) : const Text("Sign In System", style: TextStyle(
                     color:Colors.white,fontSize: 40, fontWeight: FontWeight.bold
                 ),), //title text
               ),
 
               Container(
                 margin: const EdgeInsets.only(top:10),
-                child: const Text("Sign In using Email and Password", style: TextStyle(
+                child: SignupOrLogin ? const Text("Sign up using Email, Username, and Password", style: TextStyle(
+                    color:Colors.white,fontSize: 15
+                ),) : const Text("Sign in using Email and Password", style: TextStyle(
                     color:Colors.white,fontSize: 15
                 ),), //subtitle text
               ),
@@ -148,18 +210,39 @@ class _LoginPage extends State<LoginPage>{
                 padding: const EdgeInsets.fromLTRB(10,0,10,0),
                 margin: const EdgeInsets.only(top:10),
                 child: TextField(
-                  controller: _username, //set username controller
+                  controller: _email, //set username controller
                   style:TextStyle(color:Colors.orange[100], fontSize:20),
                   decoration: myInputDecoration(
-                    label: "Username",
-                    icon: Icons.person,
+                    label: "Email",
+                    icon: Icons.mail,
                   ),
                   onChanged: (value){
                     //set username  text on change
-                    username = value;
+                    email = value;
                   },
 
                 ),
+              ),
+
+              Visibility(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10,0,10,0),
+                  margin: const EdgeInsets.only(top:10),
+                  child: TextField(
+                    controller: _username, //set username controller
+                    style:TextStyle(color:Colors.orange[100], fontSize:20),
+                    decoration: myInputDecoration(
+                      label: "Username",
+                      icon: Icons.person,
+                    ),
+                    onChanged: (value){
+                      //set username  text on change
+                      username = value;
+                    },
+
+                  ),
+                ),
+                visible: SignupOrLogin ? true:false,
               ),
 
               Container(
@@ -191,7 +274,7 @@ class _LoginPage extends State<LoginPage>{
                         //show progress indicator on click
                         showprogress = true;
                       });
-                      startLogin();
+                      SignupOrLogin ? startSignup():startLogin();
 
                     },
                     child: (showprogress as bool)?
@@ -201,7 +284,7 @@ class _LoginPage extends State<LoginPage>{
                         backgroundColor: Colors.orange[100],
                         valueColor: const AlwaysStoppedAnimation<Color>(Colors.deepOrangeAccent),
                       ),
-                    ): const Text("LOGIN NOW", style: TextStyle(fontSize: 20),),
+                    ): SignupOrLogin ? const Text("SIGN UP NOW", style: TextStyle(fontSize: 20),) : const Text("LOGIN NOW", style: TextStyle(fontSize: 20),),
                     // if showprogress == true then show progress indicator
                     // else show "LOGIN NOW" text
                     style: ElevatedButton.styleFrom(
@@ -221,9 +304,16 @@ class _LoginPage extends State<LoginPage>{
                 margin: const EdgeInsets.only(top:20),
                 child: InkResponse(
                     onTap:(){
-                      //action on tap
+                      if(SignupOrLogin == true) {
+                        SignupOrLogin = false;
+                      }else{
+                        SignupOrLogin = true;
+                      }
+                      setState(() {});
                     },
-                    child: const Text("Forgot Password? Troubleshoot",
+                    child: SignupOrLogin ? const Text("Already have an account? Login.",
+                      style: TextStyle(color:Colors.white, fontSize:18),
+                    ) : const Text("Don't have an account? Signup.",
                       style: TextStyle(color:Colors.white, fontSize:18),
                     )
                 ),
