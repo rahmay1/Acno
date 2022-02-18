@@ -55,6 +55,7 @@ class _CameraScreenState extends State<CameraScreen>
 
       _imageFile = File('${directory.path}/$recentFileName');
 
+      //var image = _isRearCameraSelected ? imagelib.decodeJpg(_imageFile!.readAsBytesSync()) : imagelib.flip(imagelib.decodeImage(_imageFile!.readAsBytesSync())!, imagelib.Flip.horizontal);
       var image = imagelib.decodeJpg(_imageFile!.readAsBytesSync());
       var croppedImage = imagelib.copyCrop(image!, image.width~/2 - 250, image.height~/2 - 250, 500, 500);
       File('${directory.path}/$recentFileName').writeAsBytesSync(imagelib.encodePng(croppedImage));

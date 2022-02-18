@@ -37,7 +37,13 @@ class _RootAppState extends State<RootApp> {
               actions: <Widget>[
                 MaterialButton(
                     child: const Text("Camera"),
-                    onPressed: () => Navigator.pop(context, ImageSource.camera)
+                    onPressed: (){
+                      _initCamera().then((i) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => CameraScreen()),);
+                      });
+                    }
                 ),
                 MaterialButton(
                   child: const Text("Gallery"),
@@ -48,7 +54,7 @@ class _RootAppState extends State<RootApp> {
     );
 
     if(imageSource != null) {
-      final file = await ImagePicker.pickImage(source: imageSource);
+      final file = await ImagePicker.pickImage(source: imageSource, maxHeight: 500, maxWidth: 500);
       if(file != null) {
         setState(() => _pickedImage = File( file.path ));
       }
@@ -63,15 +69,6 @@ class _RootAppState extends State<RootApp> {
     } on CameraException catch (e) {
       print('Error in fetching the cameras: $e');
     }
-  }
-
-  void runCamera() {
-    _initCamera().then((i) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CameraScreen()),);
-    });
-
   }
 
   @override
@@ -196,7 +193,7 @@ class _RootAppState extends State<RootApp> {
       onTap: () {
         setState(() {
           //_pickedImage == null ? _pickImage() : main([""], _pickedImage as File);
-          runCamera();
+          _pickImage();
           //activeTab = 2;
         });
       },
