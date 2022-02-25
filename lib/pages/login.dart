@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:acne_detector/pages/root_app.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,134 +17,232 @@ class LoginPage extends StatefulWidget {
 class _LoginPage extends State<LoginPage> {
   String? errormsg;
   bool? error, showprogress;
-  String? username, password, email, fullname;
+  String? username, password, email;
+  //String? fullname;
   bool signupOrLogin = true;
+  final formkey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
 
   final TextEditingController _fullname = TextEditingController();
   final TextEditingController _username = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
 
+  // startLogin() async {
+  //   String apiurl = "http://10.0.2.2:8000/login.php"; //api url
+  //   print(username);
+  //
+  //   var response = await http.post(Uri.parse(apiurl), body: {
+  //     'username': username, //send the username text
+  //     'password': password //send password text
+  //   });
+  //
+  //   if (response.statusCode == 200) {
+  //     var jsondata = json.decode(response.body);
+  //     if (jsondata["error"]) {
+  //       setState(() {
+  //         showprogress = false;  //don't show progress indicator
+  //         error = true;
+  //         errormsg = jsondata["message"];
+  //       });
+  //     } else {
+  //       if (jsondata["success"]) {
+  //         setState(() {
+  //           error = false;
+  //           showprogress = false;
+  //         });
+  //         //save the data returned from server
+  //         //and navigate to home page
+  //         String user_id = jsondata["user_id"];
+  //         String fullname = jsondata["fullname"];
+  //         print(user_id);
+  //         print(fullname);
+  //         Navigator.of(context).push(
+  //           MaterialPageRoute(
+  //             builder: (context) => const RootApp(),
+  //           ),
+  //         );
+  //
+  //       } else {
+  //         showprogress = false;
+  //         error = true;
+  //         errormsg = "Something went wrong.";
+  //       }
+  //     }
+  //   } else {
+  //     setState(() {
+  //       showprogress = false;
+  //       error = true;
+  //       errormsg = "Error during connecting to server.";
+  //     });
+  //   }
+  // }
+  //
+  // startSignup() async {
+  //
+  //   String apiurl = "http://10.0.2.2:8000/signup.php"; //api url
+  //   print(username);
+  //
+  //   var response = await http.post(Uri.parse(apiurl), body: {
+  //     'fullname': fullname, //send the fullname text
+  //     'email': email, //send the email text
+  //     'username': username, //send the username text
+  //     'password': password //send password text
+  //   });
+  //   if (response.statusCode == 200) {
+  //     var jsondata = json.decode(response.body);
+  //     if (jsondata["error"]) {
+  //       setState(() {
+  //         showprogress = false; //don't show progress indicator
+  //         error = true;
+  //         errormsg = jsondata["message"];
+  //       });
+  //     } else {
+  //       if (jsondata["success"]) {
+  //         setState(() {
+  //           error = false;
+  //           showprogress = false;
+  //         });
+  //         //save the data returned from server
+  //         //and navigate to home page
+  //         String user_id = jsondata["user_id"];
+  //         String fullname = jsondata["fullname"];
+  //         print(user_id);
+  //         print(fullname);
+  //         Navigator.of(context).push(
+  //           MaterialPageRoute(
+  //             builder: (context) => const RootApp(),
+  //           ),
+  //         );
+  //
+  //       } else {
+  //         showprogress = false;
+  //         error = true;
+  //         errormsg = "Something went wrong.";
+  //       }
+  //     }
+  //   } else {
+  //     setState(() {
+  //       showprogress = false;
+  //       error = true;
+  //       errormsg = "Error during connecting to server.";
+  //     });
+  //   }
+  // }
+
   startLogin() async {
-    String apiurl = "http://10.0.2.2:8000/login.php"; //api url
-    print(username);
-
-    var response = await http.post(Uri.parse(apiurl), body: {
-      'username': username, //send the username text
-      'password': password //send password text
-    });
-
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"]) {
-        setState(() {
-          showprogress = false;  //don't show progress indicator
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (jsondata["success"]) {
-          setState(() {
-            error = false;
-            showprogress = false;
-          });
-          //save the data returned from server
-          //and navigate to home page
-          String user_id = jsondata["user_id"];
-          String fullname = jsondata["fullname"];
-          print(user_id);
-          print(fullname);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const RootApp(),
-            ),
-          );
-
-        } else {
-          showprogress = false;
-          error = true;
-          errormsg = "Something went wrong.";
-        }
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: email as String, password: password as String);
+      Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const RootApp(),
+                  ),
+                );
+    }on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        errormsg = "No user found for that email.";
+      } else if (e.code == 'wrong-password') {
+        errormsg = "Wrong password provided for that user.";
+      }else{
+        errormsg = "Error connecting to server.";
       }
+      print(e);
+      showprogress = false;
+      error = true;
+      setState(() {});
+    }catch (e){
+      errormsg = "Error connecting to server.";
+      showprogress = false;
+      error = true;
+      setState(() {});
+    }
+  }
+
+  validateLogin() async {
+
+    // bool fullnameValid =
+    //     RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$")
+    //         .hasMatch(fullname as String);
+    bool emailValid = RegExp(
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email as String);
+    bool passValid = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
+        .hasMatch(password as String);
+
+    // if (!fullnameValid) {
+    //   showprogress = false; //don't show progress indicator
+    //   error = true;
+    //   errormsg = "Please enter a valid Full Name.";
+    //   setState(() {});
+    // } else
+    if (!emailValid) {
+      showprogress = false; //don't show progress indicator
+      error = true;
+      errormsg = "Please enter a valid Email.";
+      setState(() {});
+    } else if (!passValid) {
+      showprogress = false; //don't show progress indicator
+      error = true;
+      errormsg = "Please enter a valid Password of atleast 8 characters. Use Lowercase, Uppercase, a Digit, and a Special Character (Includes: ! @ # \$ & * ~ ).";
+      setState(() {});
     } else {
-      setState(() {
-        showprogress = false;
-        error = true;
-        errormsg = "Error during connecting to server.";
-      });
+      error = false;
+      startLogin();
     }
   }
 
   startSignup() async {
-
-    String apiurl = "http://10.0.2.2:8000/signup.php"; //api url
-    print(username);
-
-    var response = await http.post(Uri.parse(apiurl), body: {
-      'fullname': fullname, //send the fullname text
-      'email': email, //send the email text
-      'username': username, //send the username text
-      'password': password //send password text
-    });
-    if (response.statusCode == 200) {
-      var jsondata = json.decode(response.body);
-      if (jsondata["error"]) {
-        setState(() {
-          showprogress = false; //don't show progress indicator
-          error = true;
-          errormsg = jsondata["message"];
-        });
-      } else {
-        if (jsondata["success"]) {
-          setState(() {
-            error = false;
-            showprogress = false;
-          });
-          //save the data returned from server
-          //and navigate to home page
-          String user_id = jsondata["user_id"];
-          String fullname = jsondata["fullname"];
-          print(user_id);
-          print(fullname);
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const RootApp(),
-            ),
-          );
-
-        } else {
-          showprogress = false;
-          error = true;
-          errormsg = "Something went wrong.";
-        }
+    try {
+      var result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email as String, password: password as String);
+      User user = result.user as User;
+      user.updateDisplayName(username);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const RootApp(),
+        ),
+      );
+    }on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        errormsg = "The password provided is too weak.";
+      } else if (e.code == 'email-already-in-use') {
+        errormsg = "The account already exists for that email.";
+      }else{
+        errormsg = "Error connecting to server.";
       }
-    } else {
-      setState(() {
-        showprogress = false;
-        error = true;
-        errormsg = "Error during connecting to server.";
-      });
+      print(e);
+      showprogress = false;
+      error = true;
+      setState(() {});
+    }catch (e){
+      errormsg = "Error connecting to server.";
+      showprogress = false;
+      error = true;
+      setState(() {});
     }
   }
 
   // Validate the values for Signup
   validateSignup() async {
-    bool fullnameValid =
-        RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$")
-            .hasMatch(fullname as String);
+
+    // bool fullnameValid =
+    //     RegExp(r"^\s*([A-Za-z]{1,}([\.,] |[-']| ))+[A-Za-z]+\.?\s*$")
+    //         .hasMatch(fullname as String);
     bool emailValid = RegExp(
-            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
         .hasMatch(email as String);
     bool userValid = !((username as String) == "");
     bool passValid = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
-            .hasMatch(password as String);
+        .hasMatch(password as String);
 
-    if (!fullnameValid) {
-      showprogress = false; //don't show progress indicator
-      error = true;
-      errormsg = "Please enter a valid Full Name.";
-      setState(() {});
-    } else if (!emailValid) {
+    // if (!fullnameValid) {
+    //   showprogress = false; //don't show progress indicator
+    //   error = true;
+    //   errormsg = "Please enter a valid Full Name.";
+    //   setState(() {});
+    // } else
+    if (!emailValid) {
       showprogress = false; //don't show progress indicator
       error = true;
       errormsg = "Please enter a valid Email.";
@@ -155,7 +255,7 @@ class _LoginPage extends State<LoginPage> {
     } else if (!passValid) {
       showprogress = false; //don't show progress indicator
       error = true;
-      errormsg = "Please enter a valid Password. Use Lowercase, Uppercase, a Digit, and a Special Character (Includes: ! @ # \$ & * ~ ).";
+      errormsg = "Please enter a valid Password of atleast 8 characters. Use Lowercase, Uppercase, a Digit, and a Special Character (Includes: ! @ # \$ & * ~ ).";
       setState(() {});
     } else {
       error = false;
@@ -163,16 +263,62 @@ class _LoginPage extends State<LoginPage> {
     }
   }
 
+  checkConnection() async {
+
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print('connected');
+
+        signupOrLogin ? validateSignup():validateLogin();
+      }
+    } on SocketException catch (_) {
+      print('not connected');
+      setState(() {});
+      showprogress = false; //don't show progress indicator
+      showAlertDialog(context);
+    }
+
+  }
+
+  showAlertDialog(BuildContext context) {
+
+    // set up the button
+    Widget okButton = TextButton(
+      child: Text("OK"),
+      onPressed: () { Navigator.of(context).pop(); },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("No Connection"),
+      content: Text("Could not connect to internet."),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
   void clearText() {
-    _fullname.text = "";
+    //_fullname.text = "";
     _username.text = "";
     _password.text = "";
     _email.text = "";
+    errormsg = "";
+    error = false;
   }
 
   @override
   void initState() {
-    fullname = "";
+    //fullname = "";
     username = "";
     password = "";
     email = "";
@@ -255,59 +401,61 @@ class _LoginPage extends State<LoginPage> {
             //if error == true then show error message
             //else set empty container as child
           ),
-          Visibility(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              margin: const EdgeInsets.only(top: 10),
-              child: TextField(
-                controller: _fullname, //set username controller
-                style: TextStyle(color: Colors.orange[100], fontSize: 20),
-                decoration: myInputDecoration(
-                  label: "Full Name",
-                  icon: Icons.person,
-                ),
-                onChanged: (value) {
-                  //set username  text on change
-                  fullname = value;
-                },
-              ),
-            ),
-            visible: signupOrLogin ? true : false,
-          ),
-          Visibility(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              margin: const EdgeInsets.only(top: 10),
-              child: TextField(
-                controller: _email, //set username controller
-                style: TextStyle(color: Colors.orange[100], fontSize: 20),
-                decoration: myInputDecoration(
-                  label: "Email",
-                  icon: Icons.mail,
-                ),
-                onChanged: (value) {
-                  email = value;
-                },
-              ),
-            ),
-            visible: signupOrLogin ? true : false,
-          ),
+          // Visibility(
+          //   child: Container(
+          //     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          //     margin: const EdgeInsets.only(top: 10),
+          //     child: TextField(
+          //       controller: _fullname, //set username controller
+          //       style: TextStyle(color: Colors.orange[100], fontSize: 20),
+          //       decoration: myInputDecoration(
+          //         label: "Full Name",
+          //         icon: Icons.person,
+          //       ),
+          //       onChanged: (value) {
+          //         //set username  text on change
+          //         fullname = value;
+          //       },
+          //     ),
+          //   ),
+          //   visible: signupOrLogin ? true : false,
+          // ),
           Container(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             margin: const EdgeInsets.only(top: 10),
             child: TextField(
-              controller: _username, //set username controller
+              controller: _email, //set username controller
               style: TextStyle(color: Colors.orange[100], fontSize: 20),
               decoration: myInputDecoration(
-                label: "Username",
-                icon: Icons.person,
+                label: "Email",
+                icon: Icons.mail,
               ),
               onChanged: (value) {
-                //set username  text on change
-                username = value;
+                email = value;
               },
             ),
           ),
+
+          Visibility(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              margin: const EdgeInsets.only(top: 10),
+              child: TextField(
+                controller: _username, //set username controller
+                style: TextStyle(color: Colors.orange[100], fontSize: 20),
+                decoration: myInputDecoration(
+                  label: "Username",
+                  icon: Icons.person,
+                ),
+                onChanged: (value) {
+                  //set username  text on change
+                  username = value;
+                },
+              ),
+            ),
+            visible: signupOrLogin ? true : false,
+          ),
+
           Container(
             padding: const EdgeInsets.all(10),
             child: TextField(
@@ -337,7 +485,7 @@ class _LoginPage extends State<LoginPage> {
                     //show progress indicator on click
                     showprogress = true;
                   });
-                  signupOrLogin ? validateSignup():startLogin();
+                  checkConnection();
                 },
                 child: (showprogress as bool)
                     ? SizedBox(
