@@ -6,8 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:acne_detector/pages/root_app.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:flutter_native_image/flutter_native_image.dart';
+import 'package:image/image.dart' as imagelib;
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -56,13 +55,11 @@ class _CameraScreenState extends State<CameraScreen>
 
       _imageFile = File('${directory.path}/$recentFileName');
 
-      // CHANGED CODE BELOW_________________________________________________________________
-      ImageProperties properties = await FlutterNativeImage.getImageProperties('${directory.path}/$recentFileName');
-      int originX = properties.width! ~/ 2;
-      int originY = properties.height! ~/ 2;
-      _imageFile = await FlutterNativeImage.cropImage('${directory.path}/$recentFileName', 500, 500, 500, 500);
-      // _________________________________________________________________
-
+      //var image = _isRearCameraSelected ? imagelib.decodeJpg(_imageFile!.readAsBytesSync()) : imagelib.flip(imagelib.decodeImage(_imageFile!.readAsBytesSync())!, imagelib.Flip.horizontal);
+      var image = imagelib.decodeJpg(_imageFile!.readAsBytesSync());
+      var croppedImage = imagelib.copyCrop(image!, image.width~/2 - 250, image.height~/2 - 250, 500, 500);
+      File('${directory.path}/$recentFileName').writeAsBytesSync(imagelib.encodePng(croppedImage));
+      _imageFile = File('${directory.path}/$recentFileName');
 
       setState(() {});
     }
@@ -125,7 +122,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     // Hide the status bar in Android
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+    //SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack, overlays: []);
     // Set and initialize the new camera
     onNewCameraSelected(cameras[0]);
     refreshAlreadyCapturedImages();
@@ -164,7 +161,7 @@ class _CameraScreenState extends State<CameraScreen>
             ? Column(
           children: [
             AspectRatio(
-              aspectRatio: 1 / controller!.value.aspectRatio,
+              aspectRatio: 1 / (controller!.value.aspectRatio - 0.1),
               child: Stack(
                 children: [
                   controller!.buildPreview(),
@@ -311,17 +308,7 @@ class _CameraScreenState extends State<CameraScreen>
                             InkWell(
                               onTap:
                               _imageFile != null
-                                  ? () async {
-                                //ImageProperties properties = await FlutterNativeImage.getImageProperties((_imageFile as File).path);
-
-                                // File? croppedImage = await ImageCropper.cropImage(
-                                //   sourcePath: (_imageFile as File).path,
-                                //   aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-                                //   compressQuality: 100,
-                                //   maxHeight: 500,
-                                //   maxWidth: 500,
-                                //   compressFormat: ImageCompressFormat.jpg,
-                                // );
+                                  ? () {
 
                                 Navigator.of(context).push(
                                   MaterialPageRoute(

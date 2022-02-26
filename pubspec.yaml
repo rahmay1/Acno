@@ -41,12 +41,14 @@ dependencies:
   flushbar:
   crypto:
   provider: ^4.3.1
-  http: ^0.12.1
+  # http: ^0.12.1
+  image:
   flutter_native_image: ^0.0.6
-  shared_preferences: ^0.5.8
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  # shared_preferences: ^0.5.8 # Has a problem with firebase
+  shared_preferences:
   cupertino_icons: ^1.0.2
+  firebase_core: ^1.12.0
+  firebase_auth: ^3.3.7
 
 dev_dependencies:
   flutter_test:
