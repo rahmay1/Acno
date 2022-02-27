@@ -1,6 +1,13 @@
-import 'stats/statsPage.dart';
+import 'package:acne_detector/stats/statsPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:io';
+import '../color/color.dart';
+import 'package:acne_detector/camera/camera.dart';
+import 'package:camera/camera.dart';
+
+List<CameraDescription> cameras = [];
+File? imagePicked;
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -52,22 +59,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  Future<void> _initCamera() async {
+    // Fetch the available cameras before initializing the app.
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      cameras = await availableCameras();
+    } on CameraException catch (e) {
+      print('Error in fetching the cameras: $e');
+    }
   }
 
-
-
   void _onItemTapped(int index) {
+    if (index == 1){
+      _initCamera().then((i) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CameraScreen()),);
+      });
+    }
     if (index == 2){
       Navigator.of(context).push(MaterialPageRoute(builder: (context) => const StatsPage(title: 'stats')));
     }
@@ -97,136 +107,138 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Blackhead",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        child: new SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Blackhead",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Whitehead",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Whitehead",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Cyst",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Cyst",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Papule",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Papule",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Nodule",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Nodule",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-            SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: () {},
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: const Text(
-                  "Pustule",
-                  style: TextStyle(
-                    color: black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              SizedBox(height: 15),
+              ElevatedButton(
+                onPressed: () {},
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    "Pustule",
+                    style: TextStyle(
+                      color: black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.left,
                   ),
-                  textAlign: TextAlign.left,
                 ),
+                style: ElevatedButton.styleFrom(
+                    primary: tabsBeige,
+                    fixedSize: const Size(320, 80),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20))),
               ),
-              style: ElevatedButton.styleFrom(
-                  primary: tabsBeige,
-                  fixedSize: const Size(320, 80),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20))),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
 

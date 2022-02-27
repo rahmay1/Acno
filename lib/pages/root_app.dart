@@ -11,7 +11,7 @@ import 'dart:io';
 import 'package:acne_detector/camera/camera.dart';
 import 'package:camera/camera.dart';
 
-List<CameraDescription> cameras = [];
+//List<CameraDescription> cameras = [];
 
 class RootApp extends StatefulWidget {
   //const RootApp({Key? key}) : super(key: key);
@@ -25,7 +25,7 @@ class RootApp extends StatefulWidget {
 }
 
 class _RootAppState extends State<RootApp> {
-  int activeTab = 2;
+  int activeTab = 5;
   File? _pickedImage;
 
   void _pickImage() async {
@@ -38,11 +38,11 @@ class _RootAppState extends State<RootApp> {
                 MaterialButton(
                     child: const Text("Camera"),
                     onPressed: (){
-                      _initCamera().then((i) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => CameraScreen()),);
-                      });
+                      // _initCamera().then((i) {
+                      //   Navigator.push(
+                      //     context,
+                      //     MaterialPageRoute(builder: (context) => CameraScreen()),);
+                      // });
                     }
                 ),
                 MaterialButton(
@@ -61,15 +61,15 @@ class _RootAppState extends State<RootApp> {
     }
   }
 
-  Future<void> _initCamera() async {
-    // Fetch the available cameras before initializing the app.
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-      cameras = await availableCameras();
-    } on CameraException catch (e) {
-      print('Error in fetching the cameras: $e');
-    }
-  }
+  // Future<void> _initCamera() async {
+  //   // Fetch the available cameras before initializing the app.
+  //   try {
+  //     WidgetsFlutterBinding.ensureInitialized();
+  //     cameras = await availableCameras();
+  //   } on CameraException catch (e) {
+  //     print('Error in fetching the cameras: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +94,7 @@ class _RootAppState extends State<RootApp> {
           Image(image: FileImage(widget.image as File)),
         ),
         const SavedPage(),
-        const ProfilePage()
+        const ProfilePage(),
       ],
     );
   }

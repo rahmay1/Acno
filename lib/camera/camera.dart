@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
-import 'package:acne_detector/pages/root_app.dart';
+// import 'package:acne_detector/pages/root_app.dart';
+import 'package:acne_detector/search/searchPage.dart';
 import 'package:image/image.dart' as imagelib;
 
 class CameraScreen extends StatefulWidget {
@@ -310,12 +311,20 @@ class _CameraScreenState extends State<CameraScreen>
                               _imageFile != null
                                   ? () {
 
-                                Navigator.of(context).push(
+                                // Navigator.of(context).push(
+                                //   MaterialPageRoute(
+                                //     builder: (context) =>
+                                //         RootApp(
+                                //           image: _imageFile,
+                                //         ),
+                                //   ),
+                                // );
+
+                                imagePicked = _imageFile;
+                                Navigator.of(context).pop(
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        RootApp(
-                                          image: _imageFile,
-                                        ),
+                                      const MyApp(),
                                   ),
                                 );
                               }

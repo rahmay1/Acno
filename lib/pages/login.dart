@@ -6,6 +6,7 @@ import 'package:acne_detector/pages/root_app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
+import 'package:acne_detector/search/searchPage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -136,7 +137,7 @@ class _LoginPage extends State<LoginPage> {
           email: email as String, password: password as String);
       Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => const RootApp(),
+                    builder: (context) => const MyApp(),
                   ),
                 );
     }on FirebaseAuthException catch (e) {
@@ -200,7 +201,7 @@ class _LoginPage extends State<LoginPage> {
       user.updateDisplayName(username);
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const RootApp(),
+          builder: (context) => const MyApp(),
         ),
       );
     }on FirebaseAuthException catch (e) {
