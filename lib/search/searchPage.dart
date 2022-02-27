@@ -1,4 +1,5 @@
 import 'package:acne_detector/stats/statsPage.dart';
+import 'package:acne_detector/settings/settingsPage.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:io';
@@ -79,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
     if (index == 2){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const StatsPage(title: 'stats')));
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const StatsPage(title: 'Statistics')));
     }
     // setState(() {
     //   _selectedIndex = index;
@@ -102,6 +103,18 @@ class _MyHomePageState extends State<MyHomePage> {
           // the App.build method, and use it to set our appbar title.
 
           title: Center(child: Text(widget.title)),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.settings,
+                color: Colors.black,
+              ),
+              onPressed: ( ) {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingsPage(title: 'Settings')));
+              },
+            )
+          ],
         ),
       ),
       body: Center(

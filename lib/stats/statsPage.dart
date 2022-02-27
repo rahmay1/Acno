@@ -29,10 +29,8 @@ class _StatsPageState extends State<StatsPage>{
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
 
-
-          title: Center(
-              child: Text(widget.title)
-          ),
+          centerTitle: true,
+          title: Text(widget.title)
         ),),
     );
   }
