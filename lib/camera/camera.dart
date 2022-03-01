@@ -1,13 +1,15 @@
+import 'dart:async';
+import 'dart:ui' as ui;
 import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 // import 'package:acne_detector/pages/root_app.dart';
 import 'package:acne_detector/search/searchPage.dart';
 import 'package:image/image.dart' as imagelib;
+import 'package:image_picker/image_picker.dart';
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -120,6 +122,44 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
+  void _openGallery(BuildContext context) async {
+    _imageFile = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    // get the image width, height
+    Image image = new Image.file(_imageFile as File);
+    Completer<ImageInfo> completer = Completer();
+
+    image.image
+        .resolve(new ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      completer.complete(info);
+    }));
+
+    // wait for ImageInfo to finish
+    ImageInfo imageInfo = await completer.future;
+
+    // Forces user to crop image if its not within the proper bounds
+    if(imageInfo.image.width > 500 || imageInfo.image.height > 500) {
+      _imageFile = await ImageCropper().cropImage(
+        sourcePath: _imageFile?.path as String,
+        maxWidth: 500,
+        maxHeight: 500,
+        aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
+      );
+    }
+    if(_imageFile != null) {
+      this.setState(() {
+        imagePicked = _imageFile;
+      });
+      Navigator.of(context).pop(
+        MaterialPageRoute(
+          builder: (context) =>
+          const MyApp(),
+        ),
+      );
+    }
+  }
+
   @override
   void initState() {
     // Hide the status bar in Android
@@ -155,8 +195,28 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0), // here the desired height
+          child: AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
+
+              centerTitle: true,
+              title: Center(child: Text('Camera')),
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.insert_photo_outlined,
+                    color: Colors.black,
+                  ),
+                  onPressed: ( ) {
+                    _openGallery(context);
+                  },
+                )
+              ],
+          ),
+        ),
         backgroundColor: Colors.black,
         body: _isCameraInitialized
             ? Column(
@@ -462,8 +522,7 @@ class _CameraScreenState extends State<CameraScreen>
             style: TextStyle(color: Colors.white),
           ),
         ),
-      ),
-    );
+      );
   }
 }
 

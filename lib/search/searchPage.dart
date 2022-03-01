@@ -1,14 +1,19 @@
 import 'package:acne_detector/stats/statsPage.dart';
 import 'package:acne_detector/settings/settingsPage.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
 import 'dart:ui';
 import 'dart:io';
 import '../color/color.dart';
 import 'package:acne_detector/camera/camera.dart';
 import 'package:camera/camera.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 List<CameraDescription> cameras = [];
 File? imagePicked;
+bool? uploaded = false;
+final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -17,7 +22,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: '',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -74,9 +80,10 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onItemTapped(int index) {
     if (index == 1){
       _initCamera().then((i) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CameraScreen()),);
+        _awaitCamera();
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => CameraScreen()),);
       });
     }
     if (index == 2){
@@ -85,6 +92,28 @@ class _MyHomePageState extends State<MyHomePage> {
     // setState(() {
     //   _selectedIndex = index;
     // });
+  }
+
+  _awaitCamera () async{
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CameraScreen()),);
+
+    // Upload
+    if(imagePicked != null){
+      Dialogs.showLoadingDialog(context, _keyLoader);
+
+      final FirebaseStorage storage = FirebaseStorage.instance;
+      String fileName = path.basename(imagePicked?.path as String);
+      try{
+        await storage.ref('test/$fileName').putFile(imagePicked as File);
+      } on FirebaseException catch(e){
+        print(e);
+      }
+      Navigator.of(_keyLoader.currentContext as BuildContext,rootNavigator: true).pop();
+      imagePicked = null;
+    }
+
   }
 
   @override
@@ -103,6 +132,21 @@ class _MyHomePageState extends State<MyHomePage> {
           // the App.build method, and use it to set our appbar title.
 
           title: Center(child: Text(widget.title)),
+          bottom: AppBar(
+            title: Container(
+              width: double.infinity,
+              height: 40,
+              color: Colors.white,
+              child: Center(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search for an acne type',
+                    prefixIcon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+            ),
+          ),
           centerTitle: true,
           actions: <Widget>[
             IconButton(
@@ -296,5 +340,30 @@ class _MyHomePageState extends State<MyHomePage> {
       // This trailing comma makes auto-formatting nicer for build methods.
     );
 
+  }
+}
+
+class Dialogs {
+  static Future<void> showLoadingDialog(
+      BuildContext context, GlobalKey key) async {
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new WillPopScope(
+              onWillPop: () async => false,
+              child: SimpleDialog(
+                  key: key,
+                  backgroundColor: Colors.black54,
+                  children: <Widget>[
+                    Center(
+                      child: Column(children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 10,),
+                        Text("Uploading to Server...",style: TextStyle(color: Colors.blueAccent),)
+                      ]),
+                    )
+                  ]));
+        });
   }
 }
