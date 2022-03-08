@@ -66,6 +66,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String? search = "";
+
+  final TextEditingController _search = TextEditingController();
 
   Future<void> _initCamera() async {
     // Fetch the available cameras before initializing the app.
@@ -78,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _onItemTapped(int index) {
-    if (index == 1){
+    if (index == 1) {
       _initCamera().then((i) {
         _awaitCamera();
         // Navigator.push(
@@ -86,34 +89,38 @@ class _MyHomePageState extends State<MyHomePage> {
         //   MaterialPageRoute(builder: (context) => CameraScreen()),);
       });
     }
-    if (index == 2){
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const StatsPage(title: 'Statistics')));
+    if (index == 2) {
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const StatsPage(title: 'Statistics')));
     }
     // setState(() {
     //   _selectedIndex = index;
     // });
   }
 
-  _awaitCamera () async{
+  _awaitCamera() async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CameraScreen()),);
+      MaterialPageRoute(builder: (context) => CameraScreen()),
+    );
 
     // Upload
-    if(imagePicked != null){
+    if (imagePicked != null) {
       Dialogs.showLoadingDialog(context, _keyLoader);
 
       final FirebaseStorage storage = FirebaseStorage.instance;
       String fileName = path.basename(imagePicked?.path as String);
-      try{
+      try {
         await storage.ref('test/$fileName').putFile(imagePicked as File);
-      } on FirebaseException catch(e){
+      } on FirebaseException catch (e) {
         print(e);
       }
-      Navigator.of(_keyLoader.currentContext as BuildContext,rootNavigator: true).pop();
+      Navigator.of(_keyLoader.currentContext as BuildContext,
+              rootNavigator: true)
+          .pop();
+      Dialogs.showOkDialog(context, _keyLoader);
       imagePicked = null;
     }
-
   }
 
   @override
@@ -124,222 +131,233 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(100.0), // here the desired height
-        child: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize:
+              const Size.fromHeight(100.0), // here the desired height
+          child: AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
 
-          title: Center(child: Text(widget.title)),
-          bottom: AppBar(
-            title: Container(
-              width: double.infinity,
-              height: 40,
-              color: Colors.white,
-              child: Center(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search for an acne type',
-                    prefixIcon: Icon(Icons.search),
+            title: Center(child: Text(widget.title)),
+            bottom: AppBar(
+              title: Container(
+                width: double.infinity,
+                height: 40,
+                color: Colors.white,
+                child: Center(
+                  child: TextField(
+                    controller: _search,
+                    decoration: InputDecoration(
+                      hintText: 'Search for an acne type',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (value) {
+                      // change searchValue
+                      search = value;
+                      setState(() {});
+                    },
                   ),
                 ),
               ),
             ),
-          ),
-          centerTitle: true,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.settings,
-                color: Colors.black,
-              ),
-              onPressed: ( ) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SettingsPage(title: 'Settings')));
-              },
-            )
-          ],
-        ),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: new SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Blackhead",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
+            centerTitle: true,
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.settings,
+                  color: Colors.black,
                 ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Whitehead",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Cyst",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Papule",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Nodule",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-              SizedBox(height: 15),
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Pustule",
-                    style: TextStyle(
-                      color: black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          const SettingsPage(title: 'Settings')));
+                },
+              )
             ],
           ),
         ),
+        body: Center(
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          heightFactor: 1,
+          child: new SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                if (('blackhead').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('blackhead').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Blackhead",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                if (('whitehead').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('whitehead').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Whitehead",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                if (('cyst').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('cyst').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Cyst",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                if (('papule').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('papule').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Papule",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                if (('nodule').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('nodule').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Nodule",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+                if (('pustule').contains((search as String).toLowerCase())) SizedBox(height: 15),
+                if (('pustule').contains((search as String).toLowerCase())) ElevatedButton(
+                  onPressed: () {},
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: const Text(
+                      "Pustule",
+                      style: TextStyle(
+                        color: black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                      primary: tabsBeige,
+                      fixedSize: const Size(320, 80),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Search',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera_alt),
+              label: 'Camera',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.query_stats),
+              label: 'Stats',
+            ),
+          ],
+          onTap: _onItemTapped,
+        ),
+
+        // Center(
+        //   child: SvgPicture.asset(
+        //     'assets/Ellipse 117.svg'
+        //   ),
+        //
+        // ),
+
+        //   floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     _incrementCounter();
+        //   },
+        //   tooltip: 'Increment',
+        //   child: SvgPicture.network(
+        //     dogUrl,
+        //     semanticsLabel: 'Feed button',
+        //     placeholderBuilder: (context) => Icon(Icons.error),
+        //   ),
+        // ),
+
+        // This trailing comma makes auto-formatting nicer for build methods.
       ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Camera',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.query_stats),
-            label: 'Stats',
-          ),
-        ],
-        onTap: _onItemTapped,
-      ),
-
-      // Center(
-      //   child: SvgPicture.asset(
-      //     'assets/Ellipse 117.svg'
-      //   ),
-      //
-      // ),
-
-      //   floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     _incrementCounter();
-      //   },
-      //   tooltip: 'Increment',
-      //   child: SvgPicture.network(
-      //     dogUrl,
-      //     semanticsLabel: 'Feed button',
-      //     placeholderBuilder: (context) => Icon(Icons.error),
-      //   ),
-      // ),
-
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
-
   }
 }
 
@@ -359,11 +377,39 @@ class Dialogs {
                     Center(
                       child: Column(children: [
                         CircularProgressIndicator(),
-                        SizedBox(height: 10,),
-                        Text("Uploading to Server...",style: TextStyle(color: Colors.blueAccent),)
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Uploading to Server...",
+                          style: TextStyle(color: Colors.blueAccent),
+                        )
                       ]),
                     )
                   ]));
         });
+  }
+
+  static Future<void> showOkDialog(BuildContext context, GlobalKey key) async {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title:
+            Text("Upload Status", style: TextStyle(color: Colors.blueAccent)),
+        content: Text(
+          "Upload has been successfully completed.",
+          style: TextStyle(color: Colors.blueAccent),
+        ),
+        backgroundColor: Colors.black87,
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text("Ok", style: TextStyle(color: Colors.blueAccent)),
+          ),
+        ],
+      ),
+    );
   }
 }

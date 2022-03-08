@@ -34,7 +34,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   final resolutionPresets = ResolutionPreset.values;
 
-  ResolutionPreset currentResolutionPreset = ResolutionPreset.high;
+  ResolutionPreset currentResolutionPreset = ResolutionPreset.max;
 
   refreshAlreadyCapturedImages() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -59,10 +59,10 @@ class _CameraScreenState extends State<CameraScreen>
       _imageFile = File('${directory.path}/$recentFileName');
 
       //var image = _isRearCameraSelected ? imagelib.decodeJpg(_imageFile!.readAsBytesSync()) : imagelib.flip(imagelib.decodeImage(_imageFile!.readAsBytesSync())!, imagelib.Flip.horizontal);
-      var image = imagelib.decodeJpg(_imageFile!.readAsBytesSync());
-      var croppedImage = imagelib.copyCrop(image!, image.width~/2 - 250, image.height~/2 - 250, 500, 500);
-      File('${directory.path}/$recentFileName').writeAsBytesSync(imagelib.encodePng(croppedImage));
-      _imageFile = File('${directory.path}/$recentFileName');
+      // var image = imagelib.decodeJpg(_imageFile!.readAsBytesSync());
+      // var croppedImage = imagelib.copyCrop(image!, image.width~/2 - 250, image.height~/2 - 250, 500, 500);
+      // File('${directory.path}/$recentFileName').writeAsBytesSync(imagelib.encodePng(croppedImage));
+      // _imageFile = File('${directory.path}/$recentFileName');
 
       setState(() {});
     }
@@ -238,51 +238,6 @@ class _CameraScreenState extends State<CameraScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Align(
-                          alignment: Alignment.topRight,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8.0,
-                                right: 8.0,
-                              ),
-                              child: DropdownButton<ResolutionPreset>(
-                                dropdownColor: Colors.black87,
-                                underline: Container(),
-                                value: currentResolutionPreset,
-                                items: [
-                                  for (ResolutionPreset preset
-                                  in resolutionPresets)
-                                    DropdownMenuItem(
-                                      child: Text(
-                                        preset
-                                            .toString()
-                                            .split('.')[1]
-                                            .toUpperCase(),
-                                        style: const TextStyle(
-                                            color: Colors.white),
-                                      ),
-                                      value: preset,
-                                    )
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    currentResolutionPreset = value!;
-                                    _isCameraInitialized = false;
-                                  });
-                                  onNewCameraSelected(
-                                      controller!.description);
-                                },
-                                hint: const Text("Select item"),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Spacer(),
                         Expanded(
                           child: RotatedBox(
                             quarterTurns: 3,
@@ -348,6 +303,26 @@ class _CameraScreenState extends State<CameraScreen>
                                 );
 
                                 refreshAlreadyCapturedImages();
+
+                                _imageFile = await ImageCropper().cropImage(
+                                  sourcePath: _imageFile?.path as String,
+                                  maxWidth: 500,
+                                  maxHeight: 500,
+                                  aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
+                                );
+
+                                if(_imageFile != null) {
+                                  this.setState(() {
+                                    imagePicked = _imageFile;
+                                  });
+                                  Navigator.of(context).pop(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                      const MyApp(),
+                                    ),
+                                  );
+                                }
+
                               },
                               child: Stack(
                                 alignment: Alignment.center,
@@ -366,63 +341,63 @@ class _CameraScreenState extends State<CameraScreen>
                                 ],
                               ),
                             ),
-                            InkWell(
-                              onTap:
-                              _imageFile != null
-                                  ? () {
-
-                                // Navigator.of(context).push(
-                                //   MaterialPageRoute(
-                                //     builder: (context) =>
-                                //         RootApp(
-                                //           image: _imageFile,
-                                //         ),
-                                //   ),
-                                // );
-
-                                imagePicked = _imageFile;
-                                Navigator.of(context).pop(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                      const MyApp(),
-                                  ),
-                                );
-                              }
-                                  : null,
-                              child: Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius:
-                                  BorderRadius.circular(10.0),
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
-                                  image: _imageFile != null
-                                      ? DecorationImage(
-                                    image: FileImage(_imageFile!),
-                                    fit: BoxFit.cover,
-                                  )
-                                      : null,
-                                ),
-                                child: videoController != null &&
-                                    videoController!
-                                        .value.isInitialized
-                                    ? ClipRRect(
-                                  borderRadius:
-                                  BorderRadius.circular(8.0),
-                                  child: AspectRatio(
-                                    aspectRatio: videoController!
-                                        .value.aspectRatio,
-                                    child: VideoPlayer(
-                                        videoController!),
-                                  ),
-                                )
-                                    : Container(),
-                              ),
-                            ),
+                            // InkWell(
+                            //   onTap:
+                            //   _imageFile != null
+                            //       ? () {
+                            //
+                            //     // Navigator.of(context).push(
+                            //     //   MaterialPageRoute(
+                            //     //     builder: (context) =>
+                            //     //         RootApp(
+                            //     //           image: _imageFile,
+                            //     //         ),
+                            //     //   ),
+                            //     // );
+                            //
+                            //     imagePicked = _imageFile;
+                            //     Navigator.of(context).pop(
+                            //       MaterialPageRoute(
+                            //         builder: (context) =>
+                            //           const MyApp(),
+                            //       ),
+                            //     );
+                            //   }
+                            //       : null,
+                            //   child: Container(
+                            //     width: 60,
+                            //     height: 60,
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.black,
+                            //       borderRadius:
+                            //       BorderRadius.circular(10.0),
+                            //       border: Border.all(
+                            //         color: Colors.white,
+                            //         width: 2,
+                            //       ),
+                            //       image: _imageFile != null
+                            //           ? DecorationImage(
+                            //         image: FileImage(_imageFile!),
+                            //         fit: BoxFit.cover,
+                            //       )
+                            //           : null,
+                            //     ),
+                            //     child: videoController != null &&
+                            //         videoController!
+                            //             .value.isInitialized
+                            //         ? ClipRRect(
+                            //       borderRadius:
+                            //       BorderRadius.circular(8.0),
+                            //       child: AspectRatio(
+                            //         aspectRatio: videoController!
+                            //             .value.aspectRatio,
+                            //         child: VideoPlayer(
+                            //             videoController!),
+                            //       ),
+                            //     )
+                            //         : Container(),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ],
@@ -432,88 +407,88 @@ class _CameraScreenState extends State<CameraScreen>
                 ],
               ),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                      const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap: () async {
-                              setState(() {
-                                _currentFlashMode = FlashMode.off;
-                              });
-                              await controller!.setFlashMode(
-                                FlashMode.off,
-                              );
-                            },
-                            child: Icon(
-                              Icons.flash_off,
-                              color: _currentFlashMode == FlashMode.off
-                                  ? Colors.amber
-                                  : Colors.white,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              setState(() {
-                                _currentFlashMode = FlashMode.auto;
-                              });
-                              await controller!.setFlashMode(
-                                FlashMode.auto,
-                              );
-                            },
-                            child: Icon(
-                              Icons.flash_auto,
-                              color: _currentFlashMode == FlashMode.auto
-                                  ? Colors.amber
-                                  : Colors.white,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              setState(() {
-                                _currentFlashMode = FlashMode.always;
-                              });
-                              await controller!.setFlashMode(
-                                FlashMode.always,
-                              );
-                            },
-                            child: Icon(
-                              Icons.flash_on,
-                              color: _currentFlashMode == FlashMode.always
-                                  ? Colors.amber
-                                  : Colors.white,
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              setState(() {
-                                _currentFlashMode = FlashMode.torch;
-                              });
-                              await controller!.setFlashMode(
-                                FlashMode.torch,
-                              );
-                            },
-                            child: Icon(
-                              Icons.highlight,
-                              color: _currentFlashMode == FlashMode.torch
-                                  ? Colors.amber
-                                  : Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
+            // Expanded(
+            //   child: SingleChildScrollView(
+            //     physics: const BouncingScrollPhysics(),
+            //     child: Column(
+            //       children: [
+            //         Padding(
+            //           padding:
+            //           const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               InkWell(
+            //                 onTap: () async {
+            //                   setState(() {
+            //                     _currentFlashMode = FlashMode.off;
+            //                   });
+            //                   await controller!.setFlashMode(
+            //                     FlashMode.off,
+            //                   );
+            //                 },
+            //                 child: Icon(
+            //                   Icons.flash_off,
+            //                   color: _currentFlashMode == FlashMode.off
+            //                       ? Colors.amber
+            //                       : Colors.white,
+            //                 ),
+            //               ),
+            //               InkWell(
+            //                 onTap: () async {
+            //                   setState(() {
+            //                     _currentFlashMode = FlashMode.auto;
+            //                   });
+            //                   await controller!.setFlashMode(
+            //                     FlashMode.auto,
+            //                   );
+            //                 },
+            //                 child: Icon(
+            //                   Icons.flash_auto,
+            //                   color: _currentFlashMode == FlashMode.auto
+            //                       ? Colors.amber
+            //                       : Colors.white,
+            //                 ),
+            //               ),
+            //               InkWell(
+            //                 onTap: () async {
+            //                   setState(() {
+            //                     _currentFlashMode = FlashMode.always;
+            //                   });
+            //                   await controller!.setFlashMode(
+            //                     FlashMode.always,
+            //                   );
+            //                 },
+            //                 child: Icon(
+            //                   Icons.flash_on,
+            //                   color: _currentFlashMode == FlashMode.always
+            //                       ? Colors.amber
+            //                       : Colors.white,
+            //                 ),
+            //               ),
+            //               InkWell(
+            //                 onTap: () async {
+            //                   setState(() {
+            //                     _currentFlashMode = FlashMode.torch;
+            //                   });
+            //                   await controller!.setFlashMode(
+            //                     FlashMode.torch,
+            //                   );
+            //                 },
+            //                 child: Icon(
+            //                   Icons.highlight,
+            //                   color: _currentFlashMode == FlashMode.torch
+            //                       ? Colors.amber
+            //                       : Colors.white,
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            // ),
           ],
         )
             : const Center(
