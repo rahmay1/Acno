@@ -4,11 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'dart:ui';
 import 'dart:io';
+import 'dart:math';
+import 'dart:convert';
 import '../color/color.dart';
 import 'package:acne_detector/camera/camera.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:acne_detector/com/request.dart';
+import 'package:acne_detector/search/blackheadinfo.dart';
+import 'package:acne_detector/search/resultPage.dart';
+import 'package:acne_detector/pages/login.dart';
+
 
 List<CameraDescription> cameras = [];
 File? imagePicked;
@@ -42,7 +49,12 @@ class MyApp extends StatelessWidget {
         hoverColor: CompanyColors.myColor[700],
         fontFamily: 'Ariel',
       ),
-      home: const MyHomePage(title: 'Acne Types'),
+      //home: const MyHomePage(title: 'Acne Types'),
+      initialRoute: '/loginPage',
+      routes: {
+        "/searchPage": (_) => const MyHomePage(title: 'Acne Types'),
+        "/loginPage": (_) => LoginPage(),
+      },
     );
   }
 }
@@ -108,18 +120,68 @@ class _MyHomePageState extends State<MyHomePage> {
     if (imagePicked != null) {
       Dialogs.showLoadingDialog(context, _keyLoader);
 
-      final FirebaseStorage storage = FirebaseStorage.instance;
-      String fileName = path.basename(imagePicked?.path as String);
+      // final FirebaseStorage storage = FirebaseStorage.instance;
+      // String fileName = path.basename(imagePicked?.path as String);
+      // try {
+      //   await storage.ref('test/$fileName').putFile(imagePicked as File);
+      // } on FirebaseException catch (e) {
+      //   print(e);
+      // }
+
       try {
-        await storage.ref('test/$fileName').putFile(imagePicked as File);
-      } on FirebaseException catch (e) {
-        print(e);
-      }
-      Navigator.of(_keyLoader.currentContext as BuildContext,
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          print('connected');
+          String value = await onUploadImage(imagePicked as File);
+          print(value);
+          var classNamesArr = new List<String>.filled(3, '', growable: false);
+          var scoresArr = new List<double>.filled(3, 0, growable: false);
+
+          Map<String, dynamic> map = jsonDecode(value); // import 'dart:convert';
+          // map.forEach((k,v) => {
+          //   classNamesArr.add(k),
+          //   scoresArr.add(v)
+          // });
+
+          var sortedEntries = map.entries.toList()..sort((e1, e2) {
+            var diff = e2.value.compareTo(e1.value);
+            if (diff == 0) diff = e2.key.compareTo(e1.key);
+            return diff;
+          });
+
+          var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
+
+          int i = 0;
+          for (final k in newMap.keys){
+            classNamesArr[i] = k;
+            i++;
+          }
+          i = 0;
+          for (final v in newMap.values){
+            scoresArr[i] = double.parse(double.parse(v).toStringAsFixed(2));
+            i++;
+          }
+
+          Navigator.of(_keyLoader.currentContext as BuildContext,
               rootNavigator: true)
-          .pop();
-      Dialogs.showOkDialog(context, _keyLoader);
+              .pop();
+          Dialogs.showOkDialog(context, _keyLoader, "Upload Status",  "Upload has been successfully completed.");
+          imagePicked = null;
+
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => ResultPage(title: 'Result', firstClassName: classNamesArr[0],
+            secondClassName: classNamesArr[1], thirdClassName: classNamesArr[2], firstScore: scoresArr[0], secondScore: scoresArr[1], thirdScore: scoresArr[2],)));
+
+        }
+      } on SocketException catch (_) {
+        print('not connected');
+        Navigator.of(_keyLoader.currentContext as BuildContext,
+            rootNavigator: true)
+            .pop();
+        Dialogs.showOkDialog(context, _keyLoader, "No Connection", "Could not connect to internet.");
+        imagePicked = null;
+      }
       imagePicked = null;
+
     }
   }
 
@@ -131,7 +193,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return GestureDetector(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: PreferredSize(
@@ -189,7 +253,12 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[
                 if (('blackhead').contains((search as String).toLowerCase())) SizedBox(height: 15),
                 if (('blackhead').contains((search as String).toLowerCase())) ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const BlackheadInfo(title: 'Blackhead')),
+                    );
+                  },
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: const Text(
@@ -357,6 +426,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         // This trailing comma makes auto-formatting nicer for build methods.
       ),
+    ),
     );
   }
 }
@@ -390,14 +460,14 @@ class Dialogs {
         });
   }
 
-  static Future<void> showOkDialog(BuildContext context, GlobalKey key) async {
+  static Future<void> showOkDialog(BuildContext context, GlobalKey key, String Title, String Content) async {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title:
-            Text("Upload Status", style: TextStyle(color: Colors.blueAccent)),
+            Text(Title, style: TextStyle(color: Colors.blueAccent)),
         content: Text(
-          "Upload has been successfully completed.",
+          Content,
           style: TextStyle(color: Colors.blueAccent),
         ),
         backgroundColor: Colors.black87,

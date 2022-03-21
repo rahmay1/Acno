@@ -51,6 +51,10 @@ dependencies:
   firebase_auth: ^3.3.7
   firebase_storage:
   settings_ui:
+  http:
+  url_launcher:
+  syncfusion_flutter_charts: ^19.1.54
+  back_button_interceptor:
 
 dev_dependencies:
   flutter_test:

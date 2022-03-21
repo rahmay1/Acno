@@ -52,13 +52,36 @@ class _SettingsPageState extends State<SettingsPage>{
                 title: Text('Enable custom theme'),
               ),
               SettingsTile.navigation(
-                onPressed: (value) {Navigator.of(context)
-                    .pushAndRemoveUntil(
-                  CupertinoPageRoute(
-                      builder: (context) => LoginPage()
-                  ),
-                      (_) => false,
-                );},
+                onPressed: (value) {
+                //   Navigator.of(context)
+                //     .pushAndRemoveUntil(
+                //   CupertinoPageRoute(
+                //       builder: (context) => LoginPage()
+                //   ),
+                //       (_) => false,
+                // // );
+                //   Navigator.pushAndRemoveUntil(
+                //       context,
+                //       MaterialPageRoute(
+                //           builder: (context) => LoginPage()
+                //       ),
+                //       ModalRoute.withName("/")
+                //   );
+                //   NavigatorState navigatorState = Navigator.of(this.context);
+                //   while (navigatorState.canPop()) {
+                //     navigatorState.pop();
+                //   }
+                //
+                //   Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(builder: (BuildContext context) {
+                //       return LoginPage();
+                //     }),
+                //   );
+                //Navigator.pushNamedAndRemoveUntil(context, '/loginPage', (_) => false);
+                //Navigator.popUntil(context, (route) => route.isFirst);
+                Navigator.pushReplacementNamed(context, '/loginPage');
+                },
                 leading: Icon(Icons.logout),
                 title: Text('Logout'),
               ),

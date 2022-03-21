@@ -135,11 +135,14 @@ class _LoginPage extends State<LoginPage> {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email as String, password: password as String);
-      Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const MyApp(),
-                  ),
-                );
+      // Navigator.of(context).push(
+      //             MaterialPageRoute(
+      //               builder: (context) => const MyApp(),
+      //             ),
+      //           );
+      // Navigator.of(context)
+      //     .push(MaterialPageRoute(builder: (context) => MyApp()));
+      Navigator.pushReplacementNamed(context, '/searchPage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         errormsg = "No user found for that email.";
@@ -199,11 +202,14 @@ class _LoginPage extends State<LoginPage> {
           email: email as String, password: password as String);
       User user = result.user as User;
       user.updateDisplayName(username);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const MyApp(),
-        ),
-      );
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => const MyApp(),
+      //   ),
+      // );
+      // Navigator.of(context)
+      //     .push(MaterialPageRoute(builder: (context) => MyApp()));
+      Navigator.pushReplacementNamed(context, '/searchPage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         errormsg = "The password provided is too weak.";
@@ -339,7 +345,9 @@ class _LoginPage extends State<LoginPage> {
             //color set to transperent or set your own color
             ));
 
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async => false,
+    child: Scaffold(
       body: SingleChildScrollView(
           child: Container(
         constraints:
@@ -546,6 +554,7 @@ class _LoginPage extends State<LoginPage> {
           )
         ]),
       )),
+    )
     );
   }
 

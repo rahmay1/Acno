@@ -3,8 +3,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <permission android:name="android.permission.INTERNET" />
    <application
-        android:label="acne_detector"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Acno"
+        android:icon="@mipmap/acne_icon">
         <activity
             android:name=".MainActivity"
             android:exported="true"
