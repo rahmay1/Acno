@@ -142,13 +142,18 @@ class _CameraScreenState extends State<CameraScreen>
     ImageInfo imageInfo = await completer.future;
 
     // Forces user to crop image if its not within the proper bounds
-    if (imageInfo.image.width > 500 || imageInfo.image.height > 500) {
+    if (imageInfo.image.width > 500 && imageInfo.image.height > 500) {
       _imageFile = await ImageCropper().cropImage(
         sourcePath: _imageFile?.path as String,
         maxWidth: 500,
         maxHeight: 500,
         aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
       );
+    }else if (imageInfo.image.width == 500 && imageInfo.image.height == 500){
+
+    }else{
+
+      _imageFile = null;
     }
     if (_imageFile != null) {
       this.setState(() {

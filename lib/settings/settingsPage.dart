@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:acne_detector/pages/login.dart';
-
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import '../color/color.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key, required this.title}) : super(key: key);
@@ -22,19 +23,19 @@ class SettingsPage extends StatefulWidget {
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage>{
+class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(100.0), // here the desired height
         child: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
 
-          centerTitle: true,
-          title: Text(widget.title)
-        ),),
+            centerTitle: true,
+            title: Text(widget.title)),
+      ),
       body: SettingsList(
         sections: [
           SettingsSection(
@@ -45,42 +46,69 @@ class _SettingsPageState extends State<SettingsPage>{
                 title: Text('Language'),
                 value: Text('English'),
               ),
-              SettingsTile.switchTile(
-                onToggle: (value) {},
-                initialValue: false,
+              SettingsTile.navigation(
+                onPressed: (value) {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Pick a color!'),
+                          content: SingleChildScrollView(
+                            child: BlockPicker(
+                              pickerColor: Colors.red, //default color
+                              onColorChanged: (Color color) {
+                                //on color picked
+                                setState(() {
+                                  //mycolor = color;
+                                });
+                              },
+                            ),
+                          ),
+                          actions: <Widget>[
+                            ElevatedButton(
+                              child: const Text('DONE'),
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pop(); //dismiss the color picker
+                              },
+                            ),
+                          ],
+                        );
+                      });
+                },
                 leading: Icon(Icons.format_paint),
-                title: Text('Enable custom theme'),
+                title: Text('Choose custom theme'),
               ),
               SettingsTile.navigation(
                 onPressed: (value) {
-                //   Navigator.of(context)
-                //     .pushAndRemoveUntil(
-                //   CupertinoPageRoute(
-                //       builder: (context) => LoginPage()
-                //   ),
-                //       (_) => false,
-                // // );
-                //   Navigator.pushAndRemoveUntil(
-                //       context,
-                //       MaterialPageRoute(
-                //           builder: (context) => LoginPage()
-                //       ),
-                //       ModalRoute.withName("/")
-                //   );
-                //   NavigatorState navigatorState = Navigator.of(this.context);
-                //   while (navigatorState.canPop()) {
-                //     navigatorState.pop();
-                //   }
-                //
-                //   Navigator.pushReplacement(
-                //     context,
-                //     MaterialPageRoute(builder: (BuildContext context) {
-                //       return LoginPage();
-                //     }),
-                //   );
-                //Navigator.pushNamedAndRemoveUntil(context, '/loginPage', (_) => false);
-                //Navigator.popUntil(context, (route) => route.isFirst);
-                Navigator.pushReplacementNamed(context, '/loginPage');
+                  //   Navigator.of(context)
+                  //     .pushAndRemoveUntil(
+                  //   CupertinoPageRoute(
+                  //       builder: (context) => LoginPage()
+                  //   ),
+                  //       (_) => false,
+                  // // );
+                  //   Navigator.pushAndRemoveUntil(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //           builder: (context) => LoginPage()
+                  //       ),
+                  //       ModalRoute.withName("/")
+                  //   );
+                  //   NavigatorState navigatorState = Navigator.of(this.context);
+                  //   while (navigatorState.canPop()) {
+                  //     navigatorState.pop();
+                  //   }
+                  //
+                  //   Navigator.pushReplacement(
+                  //     context,
+                  //     MaterialPageRoute(builder: (BuildContext context) {
+                  //       return LoginPage();
+                  //     }),
+                  //   );
+                  //Navigator.pushNamedAndRemoveUntil(context, '/loginPage', (_) => false);
+                  //Navigator.popUntil(context, (route) => route.isFirst);
+                  Navigator.pushReplacementNamed(context, '/loginPage');
                 },
                 leading: Icon(Icons.logout),
                 title: Text('Logout'),

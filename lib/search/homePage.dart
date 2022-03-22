@@ -103,6 +103,9 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } else if (index == 2) {
       activeTab = false;
+      request().then((i) {
+        _loadStats(i);
+      });
       setState(() {});
     }
     // setState(() {
@@ -127,7 +130,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // } on FirebaseException catch (e) {
       //   print(e);
       // }
-
       try {
         final result = await InternetAddress.lookup('example.com');
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -167,9 +169,8 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.of(_keyLoader.currentContext as BuildContext,
                   rootNavigator: true)
               .pop();
-          Dialogs.showOkDialog(context, _keyLoader, "Upload Status",
+          Dialogs.showOkDialog(context, "Upload Status",
               "Upload has been successfully completed.");
-          imagePicked = null;
 
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => ResultPage(
@@ -184,15 +185,48 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       } on SocketException catch (_) {
         print('not connected');
-        Navigator.of(_keyLoader.currentContext as BuildContext,
-                rootNavigator: true)
-            .pop();
-        Dialogs.showOkDialog(context, _keyLoader, "No Connection",
+        await _initCamera();
+        Navigator.of(context, rootNavigator: true).pop();
+        Dialogs.showOkDialog(context, "No Connection",
             "Could not connect to internet.");
-        imagePicked = null;
       }
       imagePicked = null;
     }
+  }
+
+  Map<String, String> convert(Map<String, dynamic> data) {
+    return Map<String,String>.fromEntries(data.entries.map<MapEntry<String,String>>((me) => MapEntry(me.key, me.value)));
+  }
+
+  _loadStats(String data) async {
+    print(data);
+    Map<String, dynamic> oldMap = jsonDecode(data);
+    var map = Map.fromEntries(oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
+
+    //var dates = new List<String>.empty(growable: true);
+    Map<String, String> acneTypes = new Map();
+
+    // for (final k in map.keys) {
+    //   dates.add(k);
+    // }
+    // for (final k in map.values) {
+    //
+    // }
+
+    map.forEach((date, v) {
+      acneTypes.addAll(v);
+      print(date); // DateTime
+      acneTypes.forEach((classification, percent) {
+        print(classification); // Classification
+        print(percent); // Percentages
+      });
+    });
+
+    //
+    // for (final k in dates) {
+    //   print(k);
+    // }
+
   }
 
   @override
@@ -228,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
               onTap: _onItemTapped,
               currentIndex: activeTab ? 0 : 2,
-              selectedItemColor: primary,
+              selectedItemColor: CompanyColors.myColor,
               unselectedItemColor: black),
 
           // Center(
@@ -513,7 +547,7 @@ class Dialogs {
               onWillPop: () async => false,
               child: SimpleDialog(
                   key: key,
-                  backgroundColor: Colors.black54,
+                  backgroundColor: CompanyColors.myColor[900],
                   children: <Widget>[
                     Center(
                       child: Column(children: [
@@ -523,7 +557,7 @@ class Dialogs {
                         ),
                         Text(
                           "Uploading to Server...",
-                          style: TextStyle(color: Colors.blueAccent),
+                          style: TextStyle(color: CompanyColors.myColor[50]),
                         )
                       ]),
                     )
@@ -532,22 +566,22 @@ class Dialogs {
   }
 
   static Future<void> showOkDialog(
-      BuildContext context, GlobalKey key, String Title, String Content) async {
+      BuildContext context, String Title, String Content) async {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(Title, style: TextStyle(color: Colors.blueAccent)),
+        title: Text(Title, style: TextStyle(color: CompanyColors.myColor[50])),
         content: Text(
           Content,
-          style: TextStyle(color: Colors.blueAccent),
+          style: TextStyle(color: CompanyColors.myColor[50]),
         ),
-        backgroundColor: Colors.black87,
+        backgroundColor: CompanyColors.myColor[900],
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: Text("Ok", style: TextStyle(color: Colors.blueAccent)),
+            child: Text("Ok", style: TextStyle(color: CompanyColors.myColor[50])),
           ),
         ],
       ),

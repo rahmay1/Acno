@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:acne_detector/search/homePage.dart';
 
+String? UserEmail = "";
+
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -142,6 +144,7 @@ class _LoginPage extends State<LoginPage> {
       //           );
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
+      UserEmail = email;
       Navigator.pushReplacementNamed(context, '/homePage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -209,6 +212,7 @@ class _LoginPage extends State<LoginPage> {
       // );
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
+      UserEmail = email;
       Navigator.pushReplacementNamed(context, '/searchPage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -281,37 +285,10 @@ class _LoginPage extends State<LoginPage> {
       }
     } on SocketException catch (_) {
       print('not connected');
-      setState(() {});
       showprogress = false; //don't show progress indicator
-      showAlertDialog(context);
+      Dialogs.showOkDialog(context, "No Connection", "Could not connect to internet.");
     }
 
-  }
-
-  showAlertDialog(BuildContext context) {
-
-    // set up the button
-    Widget okButton = TextButton(
-      child: Text("OK"),
-      onPressed: () { Navigator.of(context).pop(); },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("No Connection"),
-      content: Text("Could not connect to internet."),
-      actions: [
-        okButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 
   void clearText() {

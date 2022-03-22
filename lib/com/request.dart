@@ -5,30 +5,32 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'package:acne_detector/pages/root_app.dart' as root_app;
+import 'package:acne_detector/pages/login.dart';
 
 //var resJson;
-
-void main(List<String> args, File image) {
-  print("IM RUNNING");
-
-  // hello().then((i) {
-  //   print(i);
-  // });
-
-  onUploadImage(image).then((i) {
-    print(i);
-  });
-
-}
+//
+// void main(List<String> args, File image) {
+//   print("IM RUNNING");
+//
+//   // hello().then((i) {
+//   //   print(i);
+//   // });
+//
+//   onUploadImage(image).then((i) {
+//     print(i);
+//   });
+//
+// }
 
 Future<String> onUploadImage(File image) async {
   var request = http.MultipartRequest(
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
-    Uri.parse("http://192.168.0.183:8000/model"),
+    Uri.parse("http://192.168.0.183:8000/server/prediction"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};
+  request.fields['UID'] = UserEmail as String;
   request.files.add(
     http.MultipartFile(
       'image',
@@ -47,6 +49,27 @@ Future<String> onUploadImage(File image) async {
     throw Exception('Failed to load');
   }
 }
+
+Future<String> request() async {
+  var request = http.MultipartRequest(
+    'POST',
+    //Uri.parse("http://10.0.2.2:8000/model"),
+    Uri.parse("http://192.168.0.183:8000//server/history"),
+    //Uri.parse("http://172.17.48.46:8000/model"),
+  );
+  Map<String, String> headers = {"Content-type": "multipart/form-data"};
+  request.fields['UID'] = UserEmail as String;
+  request.headers.addAll(headers);
+  print("request: " + request.toString());
+  var res = await request.send();
+  http.Response response = await http.Response.fromStream(res);
+  if (response.statusCode == 200) {
+    return response.body;
+  } else {
+    throw Exception('Failed to load');
+  }
+}
+
 //
 // Future<String> hello() async {
 //   final response =

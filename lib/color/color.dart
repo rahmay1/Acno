@@ -9,8 +9,8 @@ import 'package:flutter/cupertino.dart';
 const Color white = Color(0xFFFFFFFF);
 const Color black = Color(0xFF000000);
 const Color tabsBeige = Color(0XFFFAF0D3);
-const Color primary = CompanyColors.myColor;
 const Color grey = Color(0xFF3a3a3a);
+const Color defaultTheme = Color(0xFFDEA482);
 // const Color green = Color(0xFF4CAF50);
 // MaterialColor themeBeige = MaterialColor(0xFFE8D3B9, color);
 // MaterialColor themeBeige = MaterialColor(0xFFE8D3B9, color);
@@ -43,12 +43,12 @@ const Color grey = Color(0xFF3a3a3a);
 //     end: Alignment.bottomCenter,
 //   );
 // }
+int _blackPrimaryValue = 0xFFDEA482;
+
 class CompanyColors {
   CompanyColors._(); // this basically makes it so you can instantiate this class
 
-  static const _blackPrimaryValue = 0xFFDEA482;
-
-  static const MaterialColor myColor = const MaterialColor(
+  static MaterialColor myColor = MaterialColor(
     _blackPrimaryValue,
     const <int, Color>{
       50:Color.fromRGBO(243, 238, 236, 1.0),
