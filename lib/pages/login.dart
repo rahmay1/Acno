@@ -6,7 +6,7 @@ import 'package:acne_detector/pages/root_app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
-import 'package:acne_detector/search/searchPage.dart';
+import 'package:acne_detector/search/homePage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -142,7 +142,7 @@ class _LoginPage extends State<LoginPage> {
       //           );
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
-      Navigator.pushReplacementNamed(context, '/searchPage');
+      Navigator.pushReplacementNamed(context, '/homePage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         errormsg = "No user found for that email.";

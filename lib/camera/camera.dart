@@ -5,9 +5,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:video_player/video_player.dart';
+//import 'package:video_player/video_player.dart';
 // import 'package:acne_detector/pages/root_app.dart';
-import 'package:acne_detector/search/searchPage.dart';
+import 'package:acne_detector/search/homePage.dart';
 import 'package:image/image.dart' as imagelib;
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +20,6 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen>
     with WidgetsBindingObserver {
   CameraController? controller;
-  VideoPlayerController? videoController;
 
   File? _imageFile;
 
@@ -192,7 +191,6 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void dispose() {
     controller?.dispose();
-    videoController?.dispose();
     super.dispose();
   }
 
@@ -234,7 +232,7 @@ class _CameraScreenState extends State<CameraScreen>
                     children: [
                       controller!.buildPreview(),
                       cameraOverlay(
-                          padding: 50,
+                          padding: 0,
                           aspectRatio: 1,
                           color: const Color(0x55000000)),
                       Padding(
@@ -292,28 +290,23 @@ class _CameraScreenState extends State<CameraScreen>
                                   onTap: () async {
                                     XFile? rawImage = await takePicture();
                                     File imageFile = File(rawImage!.path);
-                                    print("got here");
+
                                     int currentUnix =
                                         DateTime.now().millisecondsSinceEpoch;
 
                                     final directory =
                                         await getApplicationDocumentsDirectory();
-                                    print("got here2");
+
                                     String fileFormat =
                                         imageFile.path.split('.').last;
 
                                     //print(fileFormat);
-                                    print("got here3");
 
                                     await imageFile.copy(
                                       '${directory.path}/$currentUnix.$fileFormat',
                                     );
 
-                                    print("got here4");
-
                                     refreshAlreadyCapturedImages();
-
-                                    print("got here5");
 
                                     _imageFile = await ImageCropper().cropImage(
                                       sourcePath:
@@ -323,8 +316,6 @@ class _CameraScreenState extends State<CameraScreen>
                                       aspectRatio: const CropAspectRatio(
                                           ratioX: 1.0, ratioY: 1.0),
                                     );
-
-                                    print("got here6");
 
                                     if (_imageFile != null) {
                                       this.setState(() {
