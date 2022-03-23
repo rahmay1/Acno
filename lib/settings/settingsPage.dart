@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:acne_detector/pages/login.dart';
+import 'package:acne_detector/search/homePage.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import '../color/color.dart';
+import 'package:theme_provider/theme_provider.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key, required this.title}) : super(key: key);
+  const SettingsPage({Key? key, required this.title, required this.controller}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -18,6 +19,7 @@ class SettingsPage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final ThemeController controller;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -55,13 +57,109 @@ class _SettingsPageState extends State<SettingsPage> {
                           title: Text('Pick a color!'),
                           content: SingleChildScrollView(
                             child: BlockPicker(
-                              pickerColor: Colors.red, //default color
+                              pickerColor: Color(blackPrimaryValue), //default color
                               onColorChanged: (Color color) {
                                 //on color picked
-                                setState(() {
-                                  //mycolor = color;
-                                });
+
+                                blackPrimaryValue = color.value;
+                                String selectedColor = blackPrimaryValue.toString().toLowerCase();
+                                if (!widget.controller.hasTheme(selectedColor)){
+
+                                  myColor = MaterialColor(
+                                    blackPrimaryValue,
+                                    const <int, Color>{
+                                      50:Color.fromRGBO(243, 238, 236, 1.0),
+                                      100:Color.fromRGBO(238, 215, 200, 1.0),
+                                      200:Color.fromRGBO(226, 198, 180, 1.0),
+                                      300:Color.fromRGBO(226, 183, 159, 1.0),
+                                      400:Color.fromRGBO(227, 180, 152, 1.0),
+                                      500:Color.fromRGBO(222, 164, 130, 1.0),
+                                      600:Color.fromRGBO(154, 111, 89, 1.0),
+                                      700:Color.fromRGBO(135, 96, 77, 1.0),
+                                      800:Color.fromRGBO(102, 72, 57, 1.0),
+                                      900:Color.fromRGBO(59, 41, 32, 1.0),
+                                    },
+                                  );
+                                  var newAppTheme = AppTheme(
+                                    id: selectedColor,
+                                    description: "Custom Color Scheme",
+                                    data: ThemeData(
+                                      // This is the theme of your application.
+                                      //
+                                      // Try running your application with "flutter run". You'll see the
+                                      // application has a blue toolbar. Then, without quitting the app, try
+                                      // changing the prch below to Colors.green and then invoke
+                                      // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
+                                      // or simply save your changes to "hot reload" in a Flutter IDE).
+                                      // Notice that the counter didn't reset back to zero; the application
+                                      // is not restarted.
+                                      brightness: Brightness.light,
+                                      primarySwatch: myColor,
+                                      primaryColor: myColor,
+                                      primaryColorDark: myColor[900],
+                                      primaryColorLight: myColor[50],
+                                      hoverColor: myColor[700],
+                                      fontFamily: 'Ariel',
+                                    ),
+                                  );
+
+                                  widget.controller.addTheme(newAppTheme);
+                                  setState(() {widget.controller.setTheme(selectedColor);});
+                                  //widget.controller.setTheme(blackPrimaryValue.toString());
+                                }else {
+                                  if (widget.controller.theme.id != selectedColor){
+                                    //setState(() {widget.controller.setTheme(selectedColor);});
+                                    widget.controller.removeTheme(selectedColor);
+                                    myColor = MaterialColor(
+                                      blackPrimaryValue,
+                                      const <int, Color>{
+                                        50:Color.fromRGBO(243, 238, 236, 1.0),
+                                        100:Color.fromRGBO(238, 215, 200, 1.0),
+                                        200:Color.fromRGBO(226, 198, 180, 1.0),
+                                        300:Color.fromRGBO(226, 183, 159, 1.0),
+                                        400:Color.fromRGBO(227, 180, 152, 1.0),
+                                        500:Color.fromRGBO(222, 164, 130, 1.0),
+                                        600:Color.fromRGBO(154, 111, 89, 1.0),
+                                        700:Color.fromRGBO(135, 96, 77, 1.0),
+                                        800:Color.fromRGBO(102, 72, 57, 1.0),
+                                        900:Color.fromRGBO(59, 41, 32, 1.0),
+                                      },
+                                    );
+                                    var newAppTheme = AppTheme(
+                                      id: selectedColor,
+                                      description: "Custom Color Scheme",
+                                      data: ThemeData(
+                                        // This is the theme of your application.
+                                        //
+                                        // Try running your application with "flutter run". You'll see the
+                                        // application has a blue toolbar. Then, without quitting the app, try
+                                        // changing the prch below to Colors.green and then invoke
+                                        // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
+                                        // or simply save your changes to "hot reload" in a Flutter IDE).
+                                        // Notice that the counter didn't reset back to zero; the application
+                                        // is not restarted.
+                                        brightness: Brightness.light,
+                                        primarySwatch: myColor,
+                                        primaryColor: myColor,
+                                        primaryColorDark: myColor[900],
+                                        primaryColorLight: myColor[50],
+                                        hoverColor: myColor[700],
+                                        fontFamily: 'Ariel',
+                                      ),
+                                    );
+
+                                    widget.controller.addTheme(newAppTheme);
+                                    setState(() {widget.controller.setTheme(selectedColor);});
+                                  }
+                                  //widget.controller.setTheme(blackPrimaryValue.toString());
+                                }
+
+                                print(blackPrimaryValue);
+                                for (var i in widget.controller.allThemes) {
+                                  print(i.id);
+                                }
                               },
+
                             ),
                           ),
                           actions: <Widget>[
@@ -108,6 +206,55 @@ class _SettingsPageState extends State<SettingsPage> {
                   //   );
                   //Navigator.pushNamedAndRemoveUntil(context, '/loginPage', (_) => false);
                   //Navigator.popUntil(context, (route) => route.isFirst);
+                  if (widget.controller.hasTheme('default_theme')){
+                    if (widget.controller.theme.id != 'default_theme') {
+                      //setState(() {widget.controller.setTheme(selectedColor);});
+                      widget.controller.removeTheme('default_theme');
+                      blackPrimaryValue = 0xFFDEA482;
+                      myColor = MaterialColor(
+                        blackPrimaryValue,
+                        const <int, Color>{
+                          50:Color.fromRGBO(243, 238, 236, 1.0),
+                          100:Color.fromRGBO(238, 215, 200, 1.0),
+                          200:Color.fromRGBO(226, 198, 180, 1.0),
+                          300:Color.fromRGBO(226, 183, 159, 1.0),
+                          400:Color.fromRGBO(227, 180, 152, 1.0),
+                          500:Color.fromRGBO(222, 164, 130, 1.0),
+                          600:Color.fromRGBO(154, 111, 89, 1.0),
+                          700:Color.fromRGBO(135, 96, 77, 1.0),
+                          800:Color.fromRGBO(102, 72, 57, 1.0),
+                          900:Color.fromRGBO(59, 41, 32, 1.0),
+                        },
+                      );
+                      var newAppTheme = AppTheme(
+                        id: 'default_theme',
+                        description: "Custom Color Scheme",
+                        data: ThemeData(
+                          // This is the theme of your application.
+                          //
+                          // Try running your application with "flutter run". You'll see the
+                          // application has a blue toolbar. Then, without quitting the app, try
+                          // changing the prch below to Colors.green and then invoke
+                          // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
+                          // or simply save your changes to "hot reload" in a Flutter IDE).
+                          // Notice that the counter didn't reset back to zero; the application
+                          // is not restarted.
+                          brightness: Brightness.light,
+                          primarySwatch: myColor,
+                          primaryColor: myColor,
+                          primaryColorDark: myColor[900],
+                          primaryColorLight: myColor[50],
+                          hoverColor: myColor[700],
+                          fontFamily: 'Ariel',
+                        ),
+                      );
+
+                      widget.controller.addTheme(newAppTheme);
+                      setState(() {widget.controller.setTheme('default_theme');});
+                      print("I did this!");
+                    }
+                  }
+
                   Navigator.pushReplacementNamed(context, '/loginPage');
                 },
                 leading: Icon(Icons.logout),

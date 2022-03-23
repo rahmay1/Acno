@@ -161,7 +161,7 @@ class _CameraScreenState extends State<CameraScreen>
       });
       Navigator.of(context).pop(
         MaterialPageRoute(
-          builder: (context) => const MyApp(),
+          builder: (context) => MyApp(),
         ),
       );
     }
@@ -328,7 +328,7 @@ class _CameraScreenState extends State<CameraScreen>
                                       });
                                       Navigator.of(context).pop(
                                         MaterialPageRoute(
-                                          builder: (context) => const MyApp(),
+                                          builder: (context) => MyApp(),
                                         ),
                                       );
                                     }

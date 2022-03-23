@@ -15,52 +15,93 @@ import 'package:acne_detector/search/blackheadinfo.dart';
 import 'package:acne_detector/search/resultPage.dart';
 import 'package:acne_detector/pages/login.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:theme_provider/theme_provider.dart';
 
 List<CameraDescription> cameras = [];
 File? imagePicked;
 bool? uploaded = false;
 final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+ThemeData T = ThemeData(
+  // This is the theme of your application.
+  //
+  // Try running your application with "flutter run". You'll see the
+  // application has a blue toolbar. Then, without quitting the app, try
+  // changing the prch below to Colors.green and then invoke
+  // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
+  // or simply save your changes to "hot reload" in a Flutter IDE).
+  // Notice that the counter didn't reset back to zero; the application
+  // is not restarted.
+  brightness: Brightness.light,
+  primarySwatch: myColor,
+  primaryColor: myColor,
+  primaryColorDark: myColor[900],
+  primaryColorLight: myColor[50],
+  hoverColor: myColor[700],
+  fontFamily: 'Ariel',
+);
 
+
+// class MyApp extends StatefulWidget {
+//   const MyApp({Key? key}) : super(key: key);
+//
+//   @override
+//   State<MyApp> createState() => _MyApp();
+// }
+//class _MyApp extends State<MyApp> {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: '',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the prch below to Colors.green and then invoke
-        // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        brightness: Brightness.light,
-        primarySwatch: CompanyColors.myColor,
-        primaryColor: CompanyColors.myColor,
-        primaryColorDark: CompanyColors.myColor[900],
-        primaryColorLight: CompanyColors.myColor[50],
-        hoverColor: CompanyColors.myColor[700],
-        fontFamily: 'Ariel',
+    return ThemeProvider(
+        defaultThemeId: "default_theme",
+        themes: [ // This is standard dark theme (id is default_dark_theme)
+          AppTheme(
+            id: "default_theme", // Id(or name) of the theme(Has to be unique)
+            description: "", // Description of theme
+            data: ThemeData(
+              // This is the theme of your application.
+              //
+              // Try running your application with "flutter run". You'll see the
+              // application has a blue toolbar. Then, without quitting the app, try
+              // changing the prch below to Colors.green and then invoke
+              // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
+              // or simply save your changes to "hot reload" in a Flutter IDE).
+              // Notice that the counter didn't reset back to zero; the application
+              // is not restarted.
+              brightness: Brightness.light,
+              primarySwatch: myColor,
+              primaryColor: myColor,
+              primaryColorDark: myColor[900],
+              primaryColorLight: myColor[50],
+              hoverColor: myColor[700],
+              fontFamily: 'Ariel',
+            ),
+          ),
+          AppTheme.light(), // This is standard light theme (id is default_light_theme)
+          AppTheme.dark(),
+        ],
+        child: ThemeConsumer(
+      child: Builder(
+        builder: (themeContext) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: '',
+          theme: ThemeProvider.themeOf(themeContext).data,
+          //home: const MyHomePage(title: 'Acne Types'),
+          initialRoute: '/loginPage',
+          routes: {
+            "/homePage": (_) => MyHomePage(),
+            "/loginPage": (_) => LoginPage(),
+          },
+        ),
       ),
-      //home: const MyHomePage(title: 'Acne Types'),
-      initialRoute: '/loginPage',
-      routes: {
-        "/homePage": (_) => const MyHomePage(),
-        "/loginPage": (_) => LoginPage(),
-      },
-    );
+    ));
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
+  MyHomePage({Key? key}) : super(key: key);
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
   // how it looks.
@@ -187,21 +228,23 @@ class _MyHomePageState extends State<MyHomePage> {
         print('not connected');
         await _initCamera();
         Navigator.of(context, rootNavigator: true).pop();
-        Dialogs.showOkDialog(context, "No Connection",
-            "Could not connect to internet.");
+        Dialogs.showOkDialog(
+            context, "No Connection", "Could not connect to internet.");
       }
       imagePicked = null;
     }
   }
 
   Map<String, String> convert(Map<String, dynamic> data) {
-    return Map<String,String>.fromEntries(data.entries.map<MapEntry<String,String>>((me) => MapEntry(me.key, me.value)));
+    return Map<String, String>.fromEntries(data.entries
+        .map<MapEntry<String, String>>((me) => MapEntry(me.key, me.value)));
   }
 
   _loadStats(String data) async {
     print(data);
     Map<String, dynamic> oldMap = jsonDecode(data);
-    var map = Map.fromEntries(oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
+    var map = Map.fromEntries(
+        oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
 
     //var dates = new List<String>.empty(growable: true);
     Map<String, String> acneTypes = new Map();
@@ -226,11 +269,11 @@ class _MyHomePageState extends State<MyHomePage> {
     // for (final k in dates) {
     //   print(k);
     // }
-
   }
 
   @override
   Widget build(BuildContext context) {
+    var controller = ThemeProvider.controllerOf(context);
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -242,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          appBar: activeTab ? getSearchAppBar() : getStatsAppBar(),
+          appBar: activeTab ? getSearchAppBar(controller) : getStatsAppBar(controller),
           body: activeTab ? getSearchBody() : getStatsBody(),
 
           bottomNavigationBar: BottomNavigationBar(
@@ -262,7 +305,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
               onTap: _onItemTapped,
               currentIndex: activeTab ? 0 : 2,
-              selectedItemColor: CompanyColors.myColor,
+              selectedItemColor: controller.theme.data.primaryColor,
               unselectedItemColor: black),
 
           // Center(
@@ -292,15 +335,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // ______________________Widgets for Search Page_____________________________
 
-  PreferredSizeWidget getSearchAppBar() {
+  PreferredSizeWidget getSearchAppBar(ThemeController controller) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(120.0), // here the desired height
       child: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-
+        automaticallyImplyLeading: false,
         title: const Center(child: Text('Acne Types')),
         bottom: AppBar(
+          automaticallyImplyLeading: false,
           title: Container(
             decoration: new BoxDecoration(
                 borderRadius: new BorderRadius.all(new Radius.circular(10.0)),
@@ -329,11 +373,10 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: Icon(
               Icons.settings,
-              color: Colors.black,
             ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const SettingsPage(title: 'Settings')));
+                  builder: (context) => SettingsPage(title: 'Settings', controller: controller,)));
             },
           )
         ],
@@ -503,24 +546,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
 // ______________________Widgets for Stats Page_____________________________
 
-  PreferredSizeWidget getStatsAppBar() {
+  PreferredSizeWidget getStatsAppBar(ThemeController controller) {
     return PreferredSize(
       preferredSize: const Size.fromHeight(100.0), // here the desired height
       child: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-
+        automaticallyImplyLeading: false,
         centerTitle: true,
         title: const Center(child: Text('Statistics')),
         actions: <Widget>[
           IconButton(
             icon: Icon(
               Icons.settings,
-              color: Colors.black,
             ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => const SettingsPage(title: 'Settings')));
+                  builder: (context) => SettingsPage(title: 'Settings', controller: controller,)));
             },
           )
         ],
@@ -547,17 +589,23 @@ class Dialogs {
               onWillPop: () async => false,
               child: SimpleDialog(
                   key: key,
-                  backgroundColor: CompanyColors.myColor[900],
+                  backgroundColor: myColor,
                   children: <Widget>[
                     Center(
                       child: Column(children: [
-                        CircularProgressIndicator(),
+                        CircularProgressIndicator(color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                            ? Colors.black
+                            : Colors.white,),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
                           "Uploading to Server...",
-                          style: TextStyle(color: CompanyColors.myColor[50]),
+                            style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
+                                Brightness.light
+                                ? Colors.black
+                                : Colors.white),
                         )
                       ]),
                     )
@@ -570,18 +618,27 @@ class Dialogs {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(Title, style: TextStyle(color: CompanyColors.myColor[50])),
+        title: Text(Title, style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
+            Brightness.light
+            ? Colors.black
+            : Colors.white),),
         content: Text(
           Content,
-          style: TextStyle(color: CompanyColors.myColor[50]),
+            style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
+            Brightness.light
+            ? Colors.black
+            : Colors.white),
         ),
-        backgroundColor: CompanyColors.myColor[900],
+        backgroundColor: myColor,
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: Text("Ok", style: TextStyle(color: CompanyColors.myColor[50])),
+            child: Text('Ok', style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
+                Brightness.light
+                ? Colors.black
+                : Colors.white)),
           ),
         ],
       ),

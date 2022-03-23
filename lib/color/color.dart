@@ -43,24 +43,40 @@ const Color defaultTheme = Color(0xFFDEA482);
 //     end: Alignment.bottomCenter,
 //   );
 // }
-int _blackPrimaryValue = 0xFFDEA482;
 
-class CompanyColors {
-  CompanyColors._(); // this basically makes it so you can instantiate this class
+int blackPrimaryValue = 0xFFDEA482;
+MaterialColor myColor = MaterialColor(
+  blackPrimaryValue,
+  const <int, Color>{
+    50:Color.fromRGBO(243, 238, 236, 1.0),
+    100:Color.fromRGBO(238, 215, 200, 1.0),
+    200:Color.fromRGBO(226, 198, 180, 1.0),
+    300:Color.fromRGBO(226, 183, 159, 1.0),
+    400:Color.fromRGBO(227, 180, 152, 1.0),
+    500:Color.fromRGBO(222, 164, 130, 1.0),
+    600:Color.fromRGBO(154, 111, 89, 1.0),
+    700:Color.fromRGBO(135, 96, 77, 1.0),
+    800:Color.fromRGBO(102, 72, 57, 1.0),
+    900:Color.fromRGBO(59, 41, 32, 1.0),
+  },
+);
 
-  static MaterialColor myColor = MaterialColor(
-    _blackPrimaryValue,
-    const <int, Color>{
-      50:Color.fromRGBO(243, 238, 236, 1.0),
-      100:Color.fromRGBO(238, 215, 200, 1.0),
-      200:Color.fromRGBO(226, 198, 180, 1.0),
-      300:Color.fromRGBO(226, 183, 159, 1.0),
-      400:Color.fromRGBO(227, 180, 152, 1.0),
-      500:Color.fromRGBO(222, 164, 130, 1.0),
-      600:Color.fromRGBO(154, 111, 89, 1.0),
-      700:Color.fromRGBO(135, 96, 77, 1.0),
-      800:Color.fromRGBO(102, 72, 57, 1.0),
-      900:Color.fromRGBO(59, 41, 32, 1.0),
-    },
-  );
-}
+// class CompanyColors {
+//   //CompanyColors._(); // this basically makes it so you can instantiate this class
+//
+//   static MaterialColor myColor = MaterialColor(
+//     blackPrimaryValue,
+//     const <int, Color>{
+//       50:Color.fromRGBO(243, 238, 236, 1.0),
+//       100:Color.fromRGBO(238, 215, 200, 1.0),
+//       200:Color.fromRGBO(226, 198, 180, 1.0),
+//       300:Color.fromRGBO(226, 183, 159, 1.0),
+//       400:Color.fromRGBO(227, 180, 152, 1.0),
+//       500:Color.fromRGBO(222, 164, 130, 1.0),
+//       600:Color.fromRGBO(154, 111, 89, 1.0),
+//       700:Color.fromRGBO(135, 96, 77, 1.0),
+//       800:Color.fromRGBO(102, 72, 57, 1.0),
+//       900:Color.fromRGBO(59, 41, 32, 1.0),
+//     },
+//   );
+// }
