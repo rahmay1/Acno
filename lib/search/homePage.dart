@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:acne_detector/settings/settingsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -21,24 +23,14 @@ List<CameraDescription> cameras = [];
 File? imagePicked;
 bool? uploaded = false;
 final GlobalKey<State> _keyLoader = new GlobalKey<State>();
-ThemeData T = ThemeData(
-  // This is the theme of your application.
-  //
-  // Try running your application with "flutter run". You'll see the
-  // application has a blue toolbar. Then, without quitting the app, try
-  // changing the prch below to Colors.green and then invoke
-  // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
-  // or simply save your changes to "hot reload" in a Flutter IDE).
-  // Notice that the counter didn't reset back to zero; the application
-  // is not restarted.
-  brightness: Brightness.light,
-  primarySwatch: myColor,
-  primaryColor: myColor,
-  primaryColorDark: myColor[900],
-  primaryColorLight: myColor[50],
-  hoverColor: myColor[700],
-  fontFamily: 'Ariel',
-);
+
+class AcneData {
+  String classify;
+  double percent;
+
+  AcneData(this.classify, this.percent);
+
+}
 
 
 // class MyApp extends StatefulWidget {
@@ -187,25 +179,46 @@ class _MyHomePageState extends State<MyHomePage> {
           //   scoresArr.add(v)
           // });
 
-          var sortedEntries = map.entries.toList()
-            ..sort((e1, e2) {
-              var diff = e2.value.compareTo(e1.value);
-              if (diff == 0) diff = e2.key.compareTo(e1.key);
-              return diff;
-            });
+          // var sortedEntries = map.entries.toList()
+          //   ..sort((e1, e2) {
+          //     var diff = e2.value.compareTo(e1.value);
+          //     if (diff == 0) diff = e2.key.compareTo(e1.key);
+          //     return diff;
+          //   });
 
-          var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
+          // var sortedEntries = map.keys.toList(growable:false)
+          //   ..sort((k1, k2) => map[k1].compareTo(map[k2]));
+          // LinkedHashMap sortedMap = new LinkedHashMap.fromIterable(sortedEntries, key: (k) => k, value: (k) => map[k]);
 
+          //var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
+          List<AcneData> acne = new List<AcneData>.filled(3, AcneData("", 0), growable: false);
           int i = 0;
-          for (final k in newMap.keys) {
-            classNamesArr[i] = k;
+          map.forEach((key, value) {
+            //classNamesArr[i] = key;
+            //scoresArr[i] = double.parse(double.parse(value).toStringAsFixed(2));
+            acne[i] = AcneData(key, double.parse(double.parse(value).toStringAsFixed(2)));
             i++;
-          }
-          i = 0;
-          for (final v in newMap.values) {
-            scoresArr[i] = double.parse(double.parse(v).toStringAsFixed(2));
-            i++;
-          }
+          });
+
+          acne.sort((a, b) => b.percent.compareTo(a.percent));
+
+          // for(AcneData a in acne){
+          //  print(a.classify);
+          //  print(a.percent);
+          // }
+
+          // int i = 0;
+          // for (final k in sortedEntries) {
+          //   classNamesArr[i] = k;
+          //   //print(classNamesArr[i]);
+          //   i++;
+          // }
+          // i = 0;
+          // for (final v in newMap.values) {
+          //   scoresArr[i] = double.parse(double.parse(v).toStringAsFixed(2));
+          //   //print(scoresArr[i]);
+          //   i++;
+          // }
 
           Navigator.of(_keyLoader.currentContext as BuildContext,
                   rootNavigator: true)
@@ -216,12 +229,12 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => ResultPage(
                     title: 'Result',
-                    firstClassName: classNamesArr[0],
-                    secondClassName: classNamesArr[1],
-                    thirdClassName: classNamesArr[2],
-                    firstScore: scoresArr[0],
-                    secondScore: scoresArr[1],
-                    thirdScore: scoresArr[2],
+                    firstClassName: acne[0].classify,
+                    secondClassName: acne[1].classify,
+                    thirdClassName: acne[2].classify,
+                    firstScore: acne[0].percent,
+                    secondScore: acne[1].percent,
+                    thirdScore: acne[2].percent,
                   )));
         }
       } on SocketException catch (_) {
@@ -286,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           appBar: activeTab ? getSearchAppBar(controller) : getStatsAppBar(controller),
-          body: activeTab ? getSearchBody() : getStatsBody(),
+          body: activeTab ? getSearchBody(controller) : getStatsBody(),
 
           bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -384,7 +397,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget getSearchBody() {
+  Widget getSearchBody(ThemeController controller) {
     return Center(
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
@@ -410,7 +423,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Blackhead",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -418,7 +430,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -433,7 +445,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Whitehead",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -441,7 +452,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -456,7 +467,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Cyst",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -464,7 +474,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -479,7 +489,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Papule",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -487,7 +496,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -502,7 +511,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Nodule",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -510,7 +518,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -525,7 +533,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: const Text(
                     "Pustule",
                     style: TextStyle(
-                      color: black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -533,7 +540,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                    primary: tabsBeige,
+                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                     fixedSize: const Size(320, 80),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
@@ -542,6 +549,32 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Color alphaBlend(Color foreground, Color background, int alpha) {
+    if (alpha == 0x00) { // Foreground completely transparent.
+      return background;
+    }
+    final int invAlpha = 0xff - alpha;
+    int backAlpha = background.alpha;
+    if (backAlpha == 0xff) { // Opaque background case
+      return Color.fromARGB(
+        0xff,
+        (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
+        (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
+        (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff,
+      );
+    } else { // General case
+      backAlpha = (backAlpha * invAlpha) ~/ 0xff;
+      final int outAlpha = alpha + backAlpha;
+      assert(outAlpha != 0x00);
+      return Color.fromARGB(
+        outAlpha,
+        (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
+        (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
+        (foreground.blue * alpha + background.blue * backAlpha) ~/ outAlpha,
+      );
+    }
   }
 
 // ______________________Widgets for Stats Page_____________________________
