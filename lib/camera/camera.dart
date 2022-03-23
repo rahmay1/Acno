@@ -149,11 +149,15 @@ class _CameraScreenState extends State<CameraScreen>
         maxHeight: 500,
         aspectRatio: const CropAspectRatio(ratioX: 1.0, ratioY: 1.0),
       );
-    }else if (imageInfo.image.width == 500 && imageInfo.image.height == 500){
-
-    }else{
-
+    }else if (imageInfo.image.width < 500 || imageInfo.image.height < 500){
       _imageFile = null;
+      Dialogs.showOkDialog(
+          context, "Image Error", "Please use a 500 x 500 image or greater.");
+      Navigator.of(context).pop(
+        MaterialPageRoute(
+          builder: (context) => MyApp(),
+        ),
+      );
     }
     if (_imageFile != null) {
       this.setState(() {
