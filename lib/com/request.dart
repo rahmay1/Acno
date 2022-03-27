@@ -26,7 +26,8 @@ Future<String> onUploadImage(File image) async {
   var request = http.MultipartRequest(
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
-    Uri.parse("http://192.168.0.183:8000/server/prediction"),
+    //Uri.parse("http://192.168.0.183:8000/server/prediction"),
+    Uri.parse("http://172.17.54.121:8000/server/prediction"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};
@@ -54,7 +55,8 @@ Future<String> request() async {
   var request = http.MultipartRequest(
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
-    Uri.parse("http://192.168.0.183:8000//server/history"),
+    //Uri.parse("http://192.168.0.183:8000//server/history"),
+    Uri.parse("http://172.17.54.121:8000/server/history"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};

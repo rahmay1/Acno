@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:acne_detector/settings/settingsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
@@ -13,11 +12,15 @@ import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:acne_detector/com/request.dart';
+import 'package:acne_detector/search/searchPage.dart';
+import 'package:acne_detector/search/statsPage.dart';
 import 'package:acne_detector/search/blackheadinfo.dart';
 import 'package:acne_detector/search/resultPage.dart';
 import 'package:acne_detector/pages/login.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:theme_provider/theme_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 List<CameraDescription> cameras = [];
 File? imagePicked;
@@ -31,7 +34,6 @@ class AcneData {
   AcneData(this.classify, this.percent);
 
 }
-
 
 // class MyApp extends StatefulWidget {
 //   const MyApp({Key? key}) : super(key: key);
@@ -53,15 +55,6 @@ class MyApp extends StatelessWidget {
             id: "default_theme", // Id(or name) of the theme(Has to be unique)
             description: "", // Description of theme
             data: ThemeData(
-              // This is the theme of your application.
-              //
-              // Try running your application with "flutter run". You'll see the
-              // application has a blue toolbar. Then, without quitting the app, try
-              // changing the prch below to Colors.green and then invoke
-              // "hot reload" (press "r"imarySwat in the console where you ran "flutter run",
-              // or simply save your changes to "hot reload" in a Flutter IDE).
-              // Notice that the counter didn't reset back to zero; the application
-              // is not restarted.
               brightness: Brightness.light,
               primarySwatch: myColor,
               primaryColor: myColor,
@@ -94,14 +87,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key}) : super(key: key);
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -110,8 +95,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String? search = "";
   bool activeTab = true; // True for Search Page, false for Stats Page
-
+  int activeIndex = 0;
   final TextEditingController _search = TextEditingController();
+  Map historyMap = {};
 
   Future<void> _initCamera() async {
     // Fetch the available cameras before initializing the app.
@@ -126,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onItemTapped(int index) {
     if (index == 0) {
       activeTab = true;
+      activeIndex = 0;
       setState(() {});
     } else if (index == 1) {
       _initCamera().then((i) {
@@ -135,11 +122,13 @@ class _MyHomePageState extends State<MyHomePage> {
         //   MaterialPageRoute(builder: (context) => CameraScreen()),);
       });
     } else if (index == 2) {
-      activeTab = false;
-      request().then((i) {
-        _loadStats(i);
+      request().then((i) async {
+        _loadStats(i).then((i){
+          activeTab = false;
+          activeIndex = 1;
+          setState(() {});
+        });
       });
-      setState(() {});
     }
     // setState(() {
     //   _selectedIndex = index;
@@ -256,11 +245,12 @@ class _MyHomePageState extends State<MyHomePage> {
   _loadStats(String data) async {
     print(data);
     Map<String, dynamic> oldMap = jsonDecode(data);
-    var map = Map.fromEntries(
-        oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
-
-    //var dates = new List<String>.empty(growable: true);
-    Map<String, String> acneTypes = new Map();
+    historyMap = oldMap;
+    // var map = Map.fromEntries(
+    //     oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
+    //
+    // //var dates = new List<String>.empty(growable: true);
+    // Map<String, String> acneTypes = new Map();
 
     // for (final k in map.keys) {
     //   dates.add(k);
@@ -269,14 +259,16 @@ class _MyHomePageState extends State<MyHomePage> {
     //
     // }
 
-    map.forEach((date, v) {
-      acneTypes.addAll(v);
-      print(date); // DateTime
-      acneTypes.forEach((classification, percent) {
-        print(classification); // Classification
-        print(percent); // Percentages
-      });
-    });
+    // map.forEach((date, v) {
+    //   acneTypes.addAll(v);
+    //   print(date); // DateTime
+    //   acneTypes.forEach((classification, url) {
+    //     print(classification); // Classification
+    //     print(url);
+    //     Image a = Image.network(url,);
+    //     //urlToFile(url);// URL
+    //   });
+    // });
 
     //
     // for (final k in dates) {
@@ -299,7 +291,15 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           appBar: activeTab ? getSearchAppBar(controller) : getStatsAppBar(controller),
-          body: activeTab ? getSearchBody(controller) : getStatsBody(),
+          body: IndexedStack(
+            index: activeIndex,
+            children: [
+              SearchPage(search: search, controller: controller,),
+              StatsPage(historyMap: historyMap, title: 'Statistics',),
+            ],
+          ),
+
+          //activeTab ? getSearchBody(controller) : getStatsBody(),
 
           bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
@@ -321,32 +321,13 @@ class _MyHomePageState extends State<MyHomePage> {
               selectedItemColor: controller.theme.data.primaryColor,
               unselectedItemColor: black),
 
-          // Center(
-          //   child: SvgPicture.asset(
-          //     'assets/Ellipse 117.svg'
-          //   ),
-          //
-          // ),
-
-          //   floatingActionButton: FloatingActionButton(
-          //   onPressed: () {
-          //     _incrementCounter();
-          //   },
-          //   tooltip: 'Increment',
-          //   child: SvgPicture.network(
-          //     dogUrl,
-          //     semanticsLabel: 'Feed button',
-          //     placeholderBuilder: (context) => Icon(Icons.error),
-          //   ),
-          // ),
-
           // This trailing comma makes auto-formatting nicer for build methods.
         ),
       ),
     );
   }
 
-  // ______________________Widgets for Search Page_____________________________
+  // ______________________AppBar for Search Page_____________________________
 
   PreferredSizeWidget getSearchAppBar(ThemeController controller) {
     return PreferredSize(
@@ -355,7 +336,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         automaticallyImplyLeading: false,
-        title: const Center(child: Text('Acne Types')),
+        title: Text('Acne Types'),
         bottom: AppBar(
           automaticallyImplyLeading: false,
           title: Container(
@@ -397,187 +378,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget getSearchBody(ThemeController controller) {
-    return Center(
-      // Center is a layout widget. It takes a single child and positions it
-      // in the middle of the parent.
-      heightFactor: 1,
-      child: new SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            if (('blackhead').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('blackhead').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const BlackheadInfo(title: 'Blackhead')),
-                  );
-                },
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Blackhead",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-            if (('whitehead').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('whitehead').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Whitehead",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-            if (('cyst').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('cyst').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Cyst",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-            if (('papule').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('papule').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Papule",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-            if (('nodule').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('nodule').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Nodule",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-            if (('pustule').contains((search as String).toLowerCase()))
-              SizedBox(height: 15),
-            if (('pustule').contains((search as String).toLowerCase()))
-              ElevatedButton(
-                onPressed: () {},
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    "Pustule",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    primary: alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
-                    fixedSize: const Size(320, 80),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Color alphaBlend(Color foreground, Color background, int alpha) {
-    if (alpha == 0x00) { // Foreground completely transparent.
-      return background;
-    }
-    final int invAlpha = 0xff - alpha;
-    int backAlpha = background.alpha;
-    if (backAlpha == 0xff) { // Opaque background case
-      return Color.fromARGB(
-        0xff,
-        (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
-        (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
-        (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff,
-      );
-    } else { // General case
-      backAlpha = (backAlpha * invAlpha) ~/ 0xff;
-      final int outAlpha = alpha + backAlpha;
-      assert(outAlpha != 0x00);
-      return Color.fromARGB(
-        outAlpha,
-        (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
-        (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
-        (foreground.blue * alpha + background.blue * backAlpha) ~/ outAlpha,
-      );
-    }
-  }
-
-// ______________________Widgets for Stats Page_____________________________
+// ______________________AppBar for Stats Page_____________________________
 
   PreferredSizeWidget getStatsAppBar(ThemeController controller) {
     return PreferredSize(
@@ -587,7 +388,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Center(child: Text('Statistics')),
+        title: Text('Statistics'),
         actions: <Widget>[
           IconButton(
             icon: Icon(
@@ -603,11 +404,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget getStatsBody() {
-    return Center();
-  }
-
-// _________________________________________________________________________
+// ________________________Dialog Widgets____________________________________
 
 }
 

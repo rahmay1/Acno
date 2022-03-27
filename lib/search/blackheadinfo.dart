@@ -17,70 +17,70 @@ class BlackheadInfo extends StatelessWidget {
 
   final String title;
 
-
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(100.0), // here the desired height
-        child: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
+        appBar: PreferredSize(
+          preferredSize:
+              const Size.fromHeight(100.0), // here the desired height
+          child: AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
 
-
-          title: Center(
-              child: Text(title)
+            centerTitle: true,
+            title: Text(title),
           ),
-
-        ),),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-          SizedBox(height: 30),
-          Row(
-              children: <Widget>[
-                SizedBox(width: 20,),
-                Expanded(child:
-                  Container(
-
-
-
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: RichText(
-                        text: TextSpan(
-
-                          text: 'Info\n - Acne that show up as black spots due to oil and dirt filling up pores\n\nSkin routine\n - Wash face with cleanser that contains salicylic acid\n - Gently exfoliate with AHA’s or BHA’s\n - Moisturize your skin\n\nProducts Recommendations\n - AHA exfoliater (normal or oily skin)\n - BHA exfoliater (flacky or dull skin)\n - Moisturizer (Dry skin)\n - Moisturizer (Oily skin)\n\nSuggestions\n - Try to avoid scrubs exfoliaters\n - When using AHA’s exfoliate’s make sure to avoid sunlight\n\n\n\n',
-
-                          style: TextStyle(color: Colors.black, fontSize: 18, fontFamily: "Open Sans", fontWeight: FontWeight.bold),
-                          children: <TextSpan>[
-                            TextSpan(text: 'For more information about blackhead, visit ', style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(
-                              text: 'the source.',
-                              style: TextStyle(
-                                color: Colors.blueAccent,
-                                  fontSize: 18),
-                              recognizer: TapGestureRecognizer()..onTap = () => _launchURL(),
-                            )
- ,
-                          ],
-                        ),
+        ),
+        body: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(height: 30),
+              Row(children: <Widget>[
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  child: Container(
+                      child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: RichText(
+                      text: TextSpan(
+                        text:
+                            'Info\n - Acne that show up as black spots due to oil and dirt filling up pores\n\nSkin routine\n - Wash face with cleanser that contains salicylic acid\n - Gently exfoliate with AHA’s or BHA’s\n - Moisturize your skin\n\nProducts Recommendations\n - AHA exfoliater (normal or oily skin)\n - BHA exfoliater (flacky or dull skin)\n - Moisturizer (Dry skin)\n - Moisturizer (Oily skin)\n\nSuggestions\n - Try to avoid scrubs exfoliaters\n - When using AHA’s exfoliate’s make sure to avoid sunlight\n\n\n\n',
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontFamily: "Open Sans",
+                            fontWeight: FontWeight.bold),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text:
+                                  'For more information about blackhead, visit ',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(
+                            text: 'the source.',
+                            style: TextStyle(
+                                color: Colors.blueAccent, fontSize: 18),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => _launchURL(),
+                          ),
+                        ],
                       ),
-                    )
+                    ),
+                  )),
                 ),
+                SizedBox(
+                  width: 20,
                 ),
-                SizedBox(width: 20,),
-                ]
-          )
-      ])
-    );
+              ])
+            ]));
   }
 }
 
 _launchURL() async {
-  const url = 'https://www.glamour.com/story/how-to-get-rid-of-blackheads-correctly';
+  const url =
+      'https://www.glamour.com/story/how-to-get-rid-of-blackheads-correctly';
   if (await canLaunch(url)) {
     print('launch url');
     await launch(url);

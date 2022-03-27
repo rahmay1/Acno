@@ -217,7 +217,7 @@ class _CameraScreenState extends State<CameraScreen>
           // the App.build method, and use it to set our appbar title.
 
           centerTitle: true,
-          title: Center(child: Text('Camera')),
+          title: Text('Camera'),
           actions: <Widget>[
             IconButton(
               icon: Icon(

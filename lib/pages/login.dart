@@ -213,7 +213,7 @@ class _LoginPage extends State<LoginPage> {
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
       UserEmail = email;
-      Navigator.pushReplacementNamed(context, '/searchPage');
+      Navigator.pushReplacementNamed(context, '/homePage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         errormsg = "The password provided is too weak.";
