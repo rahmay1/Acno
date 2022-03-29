@@ -158,73 +158,94 @@ class _MyHomePageState extends State<MyHomePage> {
           print('connected');
           String value = await onUploadImage(imagePicked as File);
           print(value);
-          var classNamesArr = new List<String>.filled(3, '', growable: false);
-          var scoresArr = new List<double>.filled(3, 0, growable: false);
 
-          Map<String, dynamic> map =
-              jsonDecode(value); // import 'dart:convert';
-          // map.forEach((k,v) => {
-          //   classNamesArr.add(k),
-          //   scoresArr.add(v)
-          // });
+          if (value != 'False') {
 
-          // var sortedEntries = map.entries.toList()
-          //   ..sort((e1, e2) {
-          //     var diff = e2.value.compareTo(e1.value);
-          //     if (diff == 0) diff = e2.key.compareTo(e1.key);
-          //     return diff;
-          //   });
+            var classNamesArr = new List<String>.filled(3, '', growable: false);
+            var scoresArr = new List<double>.filled(3, 0, growable: false);
 
-          // var sortedEntries = map.keys.toList(growable:false)
-          //   ..sort((k1, k2) => map[k1].compareTo(map[k2]));
-          // LinkedHashMap sortedMap = new LinkedHashMap.fromIterable(sortedEntries, key: (k) => k, value: (k) => map[k]);
+            Map<String, dynamic> map =
+            jsonDecode(value); // import 'dart:convert';
+            // map.forEach((k,v) => {
+            //   classNamesArr.add(k),
+            //   scoresArr.add(v)
+            // });
 
-          //var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
-          List<AcneData> acne = new List<AcneData>.filled(3, AcneData("", 0), growable: false);
-          int i = 0;
-          map.forEach((key, value) {
-            //classNamesArr[i] = key;
-            //scoresArr[i] = double.parse(double.parse(value).toStringAsFixed(2));
-            acne[i] = AcneData(key, double.parse(double.parse(value).toStringAsFixed(2)));
-            i++;
-          });
+            // var sortedEntries = map.entries.toList()
+            //   ..sort((e1, e2) {
+            //     var diff = e2.value.compareTo(e1.value);
+            //     if (diff == 0) diff = e2.key.compareTo(e1.key);
+            //     return diff;
+            //   });
 
-          acne.sort((a, b) => b.percent.compareTo(a.percent));
+            // var sortedEntries = map.keys.toList(growable:false)
+            //   ..sort((k1, k2) => map[k1].compareTo(map[k2]));
+            // LinkedHashMap sortedMap = new LinkedHashMap.fromIterable(sortedEntries, key: (k) => k, value: (k) => map[k]);
 
-          // for(AcneData a in acne){
-          //  print(a.classify);
-          //  print(a.percent);
-          // }
+            //var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
+            List<AcneData> acne = new List<AcneData>.filled(
+                3, AcneData("", 0), growable: false);
 
-          // int i = 0;
-          // for (final k in sortedEntries) {
-          //   classNamesArr[i] = k;
-          //   //print(classNamesArr[i]);
-          //   i++;
-          // }
-          // i = 0;
-          // for (final v in newMap.values) {
-          //   scoresArr[i] = double.parse(double.parse(v).toStringAsFixed(2));
-          //   //print(scoresArr[i]);
-          //   i++;
-          // }
+            int i = 0;
+            String time = "";
 
-          Navigator.of(_keyLoader.currentContext as BuildContext,
-                  rootNavigator: true)
-              .pop();
-          Dialogs.showOkDialog(context, "Upload Status",
-              "Upload has been successfully completed.");
+            map.forEach((key, value) {
+              //classNamesArr[i] = key;
+              //scoresArr[i] = double.parse(double.parse(value).toStringAsFixed(2));
+              if(key != 'time') {
+                acne[i] = AcneData(
+                    key, double.parse(double.parse(value).toStringAsFixed(2)));
+                i++;
+              }else{
+                time = value;
+                print(time);
+              }
+            });
 
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ResultPage(
-                    title: 'Result',
-                    firstClassName: acne[0].classify,
-                    secondClassName: acne[1].classify,
-                    thirdClassName: acne[2].classify,
-                    firstScore: acne[0].percent,
-                    secondScore: acne[1].percent,
-                    thirdScore: acne[2].percent,
-                  )));
+            acne.sort((a, b) => b.percent.compareTo(a.percent));
+
+            //await updatePredictions(time);
+
+            // for(AcneData a in acne){
+            //  print(a.classify);
+            //  print(a.percent);
+            // }
+
+            // int i = 0;
+            // for (final k in sortedEntries) {
+            //   classNamesArr[i] = k;
+            //   //print(classNamesArr[i]);
+            //   i++;
+            // }
+            // i = 0;
+            // for (final v in newMap.values) {
+            //   scoresArr[i] = double.parse(double.parse(v).toStringAsFixed(2));
+            //   //print(scoresArr[i]);
+            //   i++;
+            // }
+
+            Navigator.of(_keyLoader.currentContext as BuildContext,
+                rootNavigator: true)
+                .pop();
+            Dialogs.showOkDialog(context, "Upload Status",
+                "Upload has been successfully completed.");
+
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) =>
+                    ResultPage(
+                      title: 'Result',
+                      firstClassName: acne[0].classify,
+                      secondClassName: acne[1].classify,
+                      thirdClassName: acne[2].classify,
+                      firstScore: acne[0].percent,
+                      secondScore: acne[1].percent,
+                      thirdScore: acne[2].percent,
+                    )));
+          }else{
+            Navigator.of(context, rootNavigator: true).pop();
+            Dialogs.showOkDialog(
+                context, "Invalid Picture", "Please take a picture of acne.");
+          }
         }
       } on SocketException catch (_) {
         print('not connected');

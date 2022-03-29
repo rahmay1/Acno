@@ -8,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:acne_detector/search/homePage.dart';
 
-String? UserEmail = "";
+String? UserID = "";
 
 class LoginPage extends StatefulWidget {
   @override
@@ -135,7 +135,7 @@ class _LoginPage extends State<LoginPage> {
 
   startLogin() async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      var result = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email as String, password: password as String);
       // Navigator.of(context).push(
       //             MaterialPageRoute(
@@ -144,7 +144,8 @@ class _LoginPage extends State<LoginPage> {
       //           );
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
-      UserEmail = email;
+      User user = result.user as User;
+      UserID = user.uid;
       Navigator.pushReplacementNamed(context, '/homePage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -212,7 +213,7 @@ class _LoginPage extends State<LoginPage> {
       // );
       // Navigator.of(context)
       //     .push(MaterialPageRoute(builder: (context) => MyApp()));
-      UserEmail = email;
+      UserID = user.uid;
       Navigator.pushReplacementNamed(context, '/homePage');
     }on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
