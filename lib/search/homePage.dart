@@ -21,10 +21,12 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 List<CameraDescription> cameras = [];
 File? imagePicked;
 bool? uploaded = false;
+String time = "";
 final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
 class AcneData {
@@ -32,7 +34,6 @@ class AcneData {
   double percent;
 
   AcneData(this.classify, this.percent);
-
 }
 
 // class MyApp extends StatefulWidget {
@@ -50,7 +51,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ThemeProvider(
         defaultThemeId: "default_theme",
-        themes: [ // This is standard dark theme (id is default_dark_theme)
+        themes: [
+          // This is standard dark theme (id is default_dark_theme)
           AppTheme(
             id: "default_theme", // Id(or name) of the theme(Has to be unique)
             description: "", // Description of theme
@@ -64,24 +66,25 @@ class MyApp extends StatelessWidget {
               fontFamily: 'Ariel',
             ),
           ),
-          AppTheme.light(), // This is standard light theme (id is default_light_theme)
+          AppTheme
+              .light(), // This is standard light theme (id is default_light_theme)
           AppTheme.dark(),
         ],
         child: ThemeConsumer(
-      child: Builder(
-        builder: (themeContext) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: '',
-          theme: ThemeProvider.themeOf(themeContext).data,
-          //home: const MyHomePage(title: 'Acne Types'),
-          initialRoute: '/loginPage',
-          routes: {
-            "/homePage": (_) => MyHomePage(),
-            "/loginPage": (_) => LoginPage(),
-          },
-        ),
-      ),
-    ));
+          child: Builder(
+            builder: (themeContext) => MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: '',
+              theme: ThemeProvider.themeOf(themeContext).data,
+              //home: const MyHomePage(title: 'Acne Types'),
+              initialRoute: '/loginPage',
+              routes: {
+                "/homePage": (_) => MyHomePage(),
+                "/loginPage": (_) => LoginPage(),
+              },
+            ),
+          ),
+        ));
   }
 }
 
@@ -123,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     } else if (index == 2) {
       request().then((i) async {
-        _loadStats(i).then((i){
+        _loadStats(i).then((i) {
           activeTab = false;
           activeIndex = 1;
           setState(() {});
@@ -160,12 +163,11 @@ class _MyHomePageState extends State<MyHomePage> {
           print(value);
 
           if (value != 'False') {
-
             var classNamesArr = new List<String>.filled(3, '', growable: false);
             var scoresArr = new List<double>.filled(3, 0, growable: false);
 
             Map<String, dynamic> map =
-            jsonDecode(value); // import 'dart:convert';
+                jsonDecode(value); // import 'dart:convert';
             // map.forEach((k,v) => {
             //   classNamesArr.add(k),
             //   scoresArr.add(v)
@@ -183,20 +185,19 @@ class _MyHomePageState extends State<MyHomePage> {
             // LinkedHashMap sortedMap = new LinkedHashMap.fromIterable(sortedEntries, key: (k) => k, value: (k) => map[k]);
 
             //var newMap = Map<String, dynamic>.fromEntries(sortedEntries);
-            List<AcneData> acne = new List<AcneData>.filled(
-                3, AcneData("", 0), growable: false);
+            List<AcneData> acne =
+                new List<AcneData>.filled(3, AcneData("", 0), growable: false);
 
             int i = 0;
-            String time = "";
 
             map.forEach((key, value) {
               //classNamesArr[i] = key;
               //scoresArr[i] = double.parse(double.parse(value).toStringAsFixed(2));
-              if(key != 'time') {
+              if (key != 'time') {
                 acne[i] = AcneData(
                     key, double.parse(double.parse(value).toStringAsFixed(2)));
                 i++;
-              }else{
+              } else {
                 time = value;
                 print(time);
               }
@@ -225,14 +226,13 @@ class _MyHomePageState extends State<MyHomePage> {
             // }
 
             Navigator.of(_keyLoader.currentContext as BuildContext,
-                rootNavigator: true)
+                    rootNavigator: true)
                 .pop();
             Dialogs.showOkDialog(context, "Upload Status",
                 "Upload has been successfully completed.");
 
             Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) =>
-                    ResultPage(
+                builder: (context) => ResultPage(
                       title: 'Result',
                       firstClassName: acne[0].classify,
                       secondClassName: acne[1].classify,
@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       secondScore: acne[1].percent,
                       thirdScore: acne[2].percent,
                     )));
-          }else{
+          } else {
             Navigator.of(context, rootNavigator: true).pop();
             Dialogs.showOkDialog(
                 context, "Invalid Picture", "Please take a picture of acne.");
@@ -311,12 +311,21 @@ class _MyHomePageState extends State<MyHomePage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          appBar: activeTab ? getSearchAppBar(controller) : getStatsAppBar(controller),
+          appBar: activeTab
+              ? getSearchAppBar(controller)
+              : getStatsAppBar(controller),
           body: IndexedStack(
             index: activeIndex,
             children: [
-              SearchPage(search: search, controller: controller,),
-              StatsPage(historyMap: historyMap, title: 'Statistics',),
+              SearchPage(
+                search: search,
+                controller: controller,
+              ),
+              StatsPage(
+                historyMap: historyMap,
+                title: 'Statistics',
+                controller: controller,
+              ),
             ],
           ),
 
@@ -391,7 +400,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SettingsPage(title: 'Settings', controller: controller,)));
+                  builder: (context) => SettingsPage(
+                        title: 'Settings',
+                        controller: controller,
+                      )));
             },
           )
         ],
@@ -403,7 +415,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   PreferredSizeWidget getStatsAppBar(ThemeController controller) {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(100.0), // here the desired height
+      preferredSize: const Size.fromHeight(70.0), // here the desired height
       child: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
@@ -417,7 +429,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             onPressed: () {
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => SettingsPage(title: 'Settings', controller: controller,)));
+                  builder: (context) => SettingsPage(
+                        title: 'Settings',
+                        controller: controller,
+                      )));
             },
           )
         ],
@@ -444,19 +459,24 @@ class Dialogs {
                   children: <Widget>[
                     Center(
                       child: Column(children: [
-                        CircularProgressIndicator(color: ThemeData.estimateBrightnessForColor(myColor) ==
-                            Brightness.light
-                            ? Colors.black
-                            : Colors.white,),
+                        CircularProgressIndicator(
+                          color:
+                              ThemeData.estimateBrightnessForColor(myColor) ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white,
+                        ),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
                           "Uploading to Server...",
-                            style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
-                                Brightness.light
-                                ? Colors.black
-                                : Colors.white),
+                          style: TextStyle(
+                              color: ThemeData.estimateBrightnessForColor(
+                                          myColor) ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white),
                         )
                       ]),
                     )
@@ -469,16 +489,21 @@ class Dialogs {
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(Title, style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
-            Brightness.light
-            ? Colors.black
-            : Colors.white),),
+        title: Text(
+          Title,
+          style: TextStyle(
+              color: ThemeData.estimateBrightnessForColor(myColor) ==
+                      Brightness.light
+                  ? Colors.black
+                  : Colors.white),
+        ),
         content: Text(
           Content,
-            style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
-            Brightness.light
-            ? Colors.black
-            : Colors.white),
+          style: TextStyle(
+              color: ThemeData.estimateBrightnessForColor(myColor) ==
+                      Brightness.light
+                  ? Colors.black
+                  : Colors.white),
         ),
         backgroundColor: myColor,
         actions: <Widget>[
@@ -486,13 +511,209 @@ class Dialogs {
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: Text('Ok', style: TextStyle(color: ThemeData.estimateBrightnessForColor(myColor) ==
-                Brightness.light
-                ? Colors.black
-                : Colors.white)),
+            child: Text('Ok',
+                style: TextStyle(
+                    color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                        ? Colors.black
+                        : Colors.white)),
           ),
         ],
       ),
     );
   }
+
+  static int val = 0;
+
+  static Future<void> showListDialog(BuildContext context, String Title, String firstClassName, String secondClassName, String thirdClassName) async {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(Title, style: TextStyle(
+                  color: ThemeData.estimateBrightnessForColor(myColor) ==
+                      Brightness.light
+                      ? Colors.black
+                      : Colors.white)),
+              contentPadding: EdgeInsets.zero,
+              backgroundColor: myColor,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    onTap: (){
+                      setState(() {
+                        val = 0;
+                      });
+                    },
+                    title: Text(firstClassName, style: TextStyle(
+                        color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                            ? Colors.black
+                            : Colors.white)),
+                    leading: Radio(
+                      value: 0,
+                      groupValue: val,
+                      onChanged: (value) {
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    onTap: (){
+                      setState(() {
+                        val = 1;
+                      });
+                    },
+                    title: Text(secondClassName, style: TextStyle(
+                        color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                            ? Colors.black
+                            : Colors.white)),
+                    leading: Radio(
+                      value: 1,
+                      groupValue: val,
+                      onChanged: (value) {
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    onTap: (){
+                      setState(() {
+                        val = 2;
+                      });
+                    },
+                    title: Text(thirdClassName, style: TextStyle(
+                        color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                            ? Colors.black
+                            : Colors.white)),
+                    leading: Radio(
+                      value: 2,
+                      groupValue: val,
+                      onChanged: (value) {
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    val = 0;
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel', style: TextStyle(
+                      color: ThemeData.estimateBrightnessForColor(myColor) ==
+                          Brightness.light
+                          ? Colors.black
+                          : Colors.white)),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Do stuff
+                    if(val == 0){
+                      await updatePredictions(time, firstClassName);
+                    }else if(val == 1){
+                      await updatePredictions(time, secondClassName);
+                    }else{
+                      await updatePredictions(time, thirdClassName);
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Submit', style: TextStyle(
+                      color: ThemeData.estimateBrightnessForColor(myColor) ==
+                          Brightness.light
+                          ? Colors.black
+                          : Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // static Future<void> showListDialog(BuildContext context, String Title, String firstClassName, String secondClassName, String thirdClassName) async {
+  //   return showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return AlertDialog(
+  //             title: Text(Title),
+  //             contentPadding: EdgeInsets.zero,
+  //             content: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 ListTile(
+  //                   onTap: (){
+  //                     setState(() {
+  //                       val = 0;
+  //                     });
+  //                   },
+  //                   title: Text(firstClassName),
+  //                   leading: Radio(
+  //                     value: 0,
+  //                     groupValue: val,
+  //                     onChanged: (value) {
+  //                     },
+  //                   ),
+  //                 ),
+  //                 ListTile(
+  //                   onTap: (){
+  //                     setState(() {
+  //                       val = 1;
+  //                     });
+  //                   },
+  //                   title: Text(secondClassName),
+  //                   leading: Radio(
+  //                     value: 1,
+  //                     groupValue: val,
+  //                     onChanged: (value) {
+  //                     },
+  //                   ),
+  //                 ),
+  //                 ListTile(
+  //                   onTap: (){
+  //                     setState(() {
+  //                       val = 3;
+  //                     });
+  //                   },
+  //                   title: Text(thirdClassName),
+  //                   leading: Radio(
+  //                     value: 3,
+  //                     groupValue: val,
+  //                     onChanged: (value) {
+  //                     },
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () {
+  //                   val = 0;
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: Text('Cancel'),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () async {
+  //                   // Do stuff
+  //                   await updatePredictions(time);
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: Text('Submit'),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
 }

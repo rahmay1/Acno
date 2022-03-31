@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:acne_detector/Search/searchPage.dart';
-
+import 'package:acne_detector/Search/historyPage.dart';
 import '../Color/color.dart';
+import '../color/color.dart' as c;
+import 'package:theme_provider/theme_provider.dart';
 
 class StatsPage extends StatelessWidget {
-  StatsPage({Key? key, required this.title, required this.historyMap}) : super(key: key);
+  StatsPage({Key? key, required this.title, required this.historyMap, required this.controller}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -18,25 +20,42 @@ class StatsPage extends StatelessWidget {
 
   final String title;
   final Map historyMap;
+  final ThemeController controller;
 
   late List<Widget> _historyData;
 
 
   @override
   Widget build(BuildContext context) {
-    _historyData = getAssessmentResults();
+    _historyData = getAssessmentResults(context);
 
-    return Center(
+    return Scaffold(
+        body: Container(
+            alignment: Alignment.topCenter,
             child: new SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: getAssessmentResults(),
+                children: getAssessmentResults(context),
               ),
 
-            ));
+            )));
   }
-  List<Widget> getAssessmentResults() {
+  List<Widget> getAssessmentResults(BuildContext context) {
     List<Widget> historyData = [];
+    Map monthMap = {
+      "01" : "Jan",
+      "02" : "Feb",
+      "03" : "Mar",
+      "04" : "Apr",
+      "05" : "May",
+      "06" : "Jun",
+      "07" : "Jul",
+      "08" : "Aug",
+      "09" : "Sep",
+      "10" : "Oct",
+      "11" : "Nov",
+      "12" : "Dec"
+    };
     // final fixedLengthList = List<int>.filled(5, 0); // Creates fixed-length list.
     // final growableList = <String>['A', 'B'];
     // List<AssementResult> historyData = List<AssementResult>.filled(5,AssementResult());
@@ -44,18 +63,29 @@ class StatsPage extends StatelessWidget {
       Map resultObject = historyMap[time];
       print(historyMap);
       // String date = resultObject['time'];
-      AssementResult(DateTime.parse(resultObject['date']), resultObject['type'], resultObject['imageUrl']);
+      final AssessmentResult result = AssessmentResult(DateTime.parse(resultObject['date']), resultObject['type'], resultObject['imageUrl']);
+      final dateList = resultObject['date'].split(" ")[0].split("-");
+      String seconds = resultObject['date'].split(" ")[1];
+      String month = monthMap[dateList[1]];
+      String day = dateList[2];
+      String year = dateList[0];
       historyData.add(SizedBox(height: 15));
       historyData.add(
           ElevatedButton(
-            onPressed: () {},
-            child: Align(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) =>  HistoryPage(title: 'Prediction History',
+                    result: result, seconds: seconds, day: day, month: month, year: year)),
+              );
+            },
+            child: Container(
               alignment: Alignment.centerLeft,
+
               child:  Text(
-                resultObject['date'],
+                " $month $day at $seconds",
                 // DateFormat("yyyy-MM-dd hh:mm:ss"). resultObject['data'],
                 style: TextStyle(
-                  color: black,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -63,7 +93,7 @@ class StatsPage extends StatelessWidget {
               ),
             ),
             style: ElevatedButton.styleFrom(
-                primary: tabsBeige,
+                primary: c.alphaBlend(controller.theme.data.primaryColor, Colors.grey[200] as Color, 118),
                 fixedSize: const Size(320, 80),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20))),
@@ -103,8 +133,8 @@ class StatsPage extends StatelessWidget {
 // "image":"uploaded_from_lib.jpeg"}
 // }
 
-class AssementResult {
-  AssementResult(this.date, this.acneType, this.acneImageUrl);
+class AssessmentResult {
+  AssessmentResult(this.date, this.acneType, this.acneImageUrl);
   final DateTime date;
   final String acneType;
   final String acneImageUrl;

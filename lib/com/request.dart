@@ -27,7 +27,7 @@ Future<String> onUploadImage(File image) async {
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
     //Uri.parse("http://192.168.0.183:8000/server/prediction"),
-    Uri.parse("http://172.17.63.51:8000/server/prediction"),
+    Uri.parse("http://192.168.0.183:8000/server/prediction"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};
@@ -56,7 +56,7 @@ Future<String> request() async {
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
     //Uri.parse("http://192.168.0.183:8000//server/history"),
-    Uri.parse("http://172.17.63.51:8000/server/history"),
+    Uri.parse("http://192.168.0.183:8000/server/history"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};
@@ -72,18 +72,18 @@ Future<String> request() async {
   }
 }
 
-Future<String> updatePredictions(String time) async {
+Future<String> updatePredictions(String time, String acneType) async {
   var request = http.MultipartRequest(
     'POST',
     //Uri.parse("http://10.0.2.2:8000/model"),
     //Uri.parse("http://192.168.0.183:8000//server/history"),
-    Uri.parse("http://172.17.63.51:8000/server/select"),
+    Uri.parse("http://192.168.0.183:8000/server/select"),
     //Uri.parse("http://172.17.48.46:8000/model"),
   );
   Map<String, String> headers = {"Content-type": "multipart/form-data"};
   request.fields['UID'] = UserID as String;
   request.fields['time'] = time;
-  request.fields['acneType'] = "Acne";
+  request.fields['acneType'] = acneType;
 
   request.headers.addAll(headers);
   print("request: " + request.toString());
