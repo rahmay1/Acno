@@ -27,6 +27,8 @@ List<CameraDescription> cameras = [];
 File? imagePicked;
 bool? uploaded = false;
 String time = "";
+String acneInput = "";
+ValueNotifier<String> acneSelected = ValueNotifier('');
 final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
 class AcneData {
@@ -230,6 +232,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 .pop();
             Dialogs.showOkDialog(context, "Upload Status",
                 "Upload has been successfully completed.");
+
+            acneSelected.value = acne[0].classify;
 
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ResultPage(
@@ -524,6 +528,7 @@ class Dialogs {
   }
 
   static int val = 0;
+  static TextEditingController _acnesearch = TextEditingController();
 
   static Future<void> showListDialog(BuildContext context, String Title, String firstClassName, String secondClassName, String thirdClassName) async {
     return showDialog(
@@ -557,6 +562,9 @@ class Dialogs {
                       value: 0,
                       groupValue: val,
                       onChanged: (value) {
+                        setState(() {
+                          val = 0;
+                        });
                       },
                     ),
                   ),
@@ -575,6 +583,9 @@ class Dialogs {
                       value: 1,
                       groupValue: val,
                       onChanged: (value) {
+                        setState(() {
+                          val = 1;
+                        });
                       },
                     ),
                   ),
@@ -593,11 +604,56 @@ class Dialogs {
                       value: 2,
                       groupValue: val,
                       onChanged: (value) {
+                        setState(() {
+                          val = 2;
+                        });
                       },
+                    ),
+                  ),
+                  ListTile(
+                    onTap: (){
+                      setState(() {
+                        val = 3;
+                      });
+                    },
+                    leading: Radio(
+                      value: 3,
+                      groupValue: val,
+                      onChanged: (value) {
+                        setState(() {
+                          val = 3;
+                        });
+                      },
+                    ),
+                    trailing: Container(
+                      width: 185.0,
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 3,
+                            child: TextField(
+                              controller: _acnesearch,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Enter your own acne',
+                              ),
+                              onChanged: (value) {
+                                // change searchValue
+                                acneInput = value;
+                                setState(() {
+                                  val = 3;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
+
               actions: [
                 TextButton(
                   onPressed: () {
@@ -614,15 +670,22 @@ class Dialogs {
                   onPressed: () async {
                     // Do stuff
                     if(val == 0){
-                      await updatePredictions(time, firstClassName);
+                      acneSelected.value = firstClassName;
+                      //await updatePredictions(time, firstClassName);
                     }else if(val == 1){
-                      await updatePredictions(time, secondClassName);
+                      acneSelected.value  = secondClassName;
+                      //await updatePredictions(time, secondClassName);
+                    }else if(val == 2){
+                      acneSelected.value  = thirdClassName;
+                      //await updatePredictions(time, thirdClassName);
                     }else{
-                      await updatePredictions(time, thirdClassName);
+                      acneSelected.value = acneInput;
+                      _acnesearch.text = "";
                     }
+                    val = 0;
                     Navigator.of(context).pop();
                   },
-                  child: Text('Submit', style: TextStyle(
+                  child: Text('Confirm', style: TextStyle(
                       color: ThemeData.estimateBrightnessForColor(myColor) ==
                           Brightness.light
                           ? Colors.black

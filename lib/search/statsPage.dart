@@ -99,10 +99,6 @@ class StatsPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20))),
           ));
 
-
-
-
-
     }
     return historyData;
     // return new Row(children: list);

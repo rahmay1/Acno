@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:acne_detector/search/homePage.dart';
+import 'package:provider/provider.dart';
+
+import '../com/request.dart';
 
 class ResultPage extends StatelessWidget {
   ResultPage(
@@ -54,9 +57,22 @@ class ResultPage extends StatelessWidget {
             // the App.build method, and use it to set our appbar title.
             centerTitle: true,
             title: Text(title),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.check,
+                ),
+                onPressed: () async {
+                  await updatePredictions(time, acneSelected.value);
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
           ),
         ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: <
+        body: Scaffold(
+    resizeToAvoidBottomInset: false, // set it to false
+    body: SingleChildScrollView(child:Column(mainAxisAlignment: MainAxisAlignment.start, children: <
             Widget>[
           // SizedBox(width: 20),
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
@@ -124,12 +140,31 @@ class ResultPage extends StatelessWidget {
                 child: Text('Choose'),
                 onPressed: () {
                   //Navigator.of(context).pop(); //dismiss the color picker
-                  Dialogs.showListDialog(context, "Choose an acne type", firstClassName, secondClassName, thirdClassName);
+                  Dialogs.showListDialog(context, "Choose an acne type",
+                      firstClassName, secondClassName, thirdClassName);
                 },
               ),
+              ValueListenableBuilder(
+                //TODO 2nd: listen playerPointsToAdd
+                valueListenable: acneSelected,
+                builder: (context, value, widget) {
+                  //TODO here you can setState or whatever you need
+                  return RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        text: "Chosen acne: " + acneSelected.value,
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontFamily: "Open Sans",
+                            fontWeight: FontWeight.bold),
+                      ));
+                },
+              ),
+              SizedBox(height: 5),
             ])))
           ])
-        ]));
+        ]))));
   }
 
   List<TopThreeData> getTopThreeData() {
@@ -144,7 +179,6 @@ class ResultPage extends StatelessWidget {
     ];
     return chartData;
   }
-
 }
 
 class TopThreeData {
