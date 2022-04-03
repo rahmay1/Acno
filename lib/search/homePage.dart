@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _onItemTapped(int index) {
+  Future<void> _onItemTapped(int index) async {
     if (index == 0) {
       activeTab = true;
       activeIndex = 0;
@@ -127,13 +127,28 @@ class _MyHomePageState extends State<MyHomePage> {
         //   MaterialPageRoute(builder: (context) => CameraScreen()),);
       });
     } else if (index == 2) {
-      request().then((i) async {
-        _loadStats(i).then((i) {
-          activeTab = false;
-          activeIndex = 1;
-          setState(() {});
-        });
-      });
+      Dialogs.showLoadingDialog(context, _keyLoader);
+      try{
+        final result = await InternetAddress.lookup('example.com');
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          print('connected');
+          request().then((i) async {
+            _loadStats(i).then((i) {
+              activeTab = false;
+              activeIndex = 1;
+              Navigator.of(_keyLoader.currentContext as BuildContext,
+                  rootNavigator: true)
+                  .pop();
+              setState(() {});
+            });
+          });
+        }
+      } on SocketException catch (_) {
+        print('not connected');
+        Navigator.of(context, rootNavigator: true).pop();
+        Dialogs.showOkDialog(
+            context, "No Connection", "Could not connect to internet.");
+      }
     }
     // setState(() {
     //   _selectedIndex = index;
@@ -658,6 +673,7 @@ class Dialogs {
                 TextButton(
                   onPressed: () {
                     val = 0;
+                    _acnesearch.text = "";
                     Navigator.of(context).pop();
                   },
                   child: Text('Cancel', style: TextStyle(
@@ -680,9 +696,7 @@ class Dialogs {
                       //await updatePredictions(time, thirdClassName);
                     }else{
                       acneSelected.value = acneInput;
-                      _acnesearch.text = "";
                     }
-                    val = 0;
                     Navigator.of(context).pop();
                   },
                   child: Text('Confirm', style: TextStyle(

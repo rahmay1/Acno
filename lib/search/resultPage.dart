@@ -5,8 +5,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:acne_detector/search/homePage.dart';
 import 'package:provider/provider.dart';
-
-import '../com/request.dart';
+import 'package:acne_detector/com/request.dart';
 
 class ResultPage extends StatelessWidget {
   ResultPage(

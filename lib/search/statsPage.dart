@@ -59,6 +59,7 @@ class StatsPage extends StatelessWidget {
     // final fixedLengthList = List<int>.filled(5, 0); // Creates fixed-length list.
     // final growableList = <String>['A', 'B'];
     // List<AssementResult> historyData = List<AssementResult>.filled(5,AssementResult());
+    historyData.add(SizedBox(height: 15));
     for (var time in historyMap.keys) {
       Map resultObject = historyMap[time];
       print(historyMap);
@@ -69,7 +70,6 @@ class StatsPage extends StatelessWidget {
       String month = monthMap[dateList[1]];
       String day = dateList[2];
       String year = dateList[0];
-      historyData.add(SizedBox(height: 15));
       historyData.add(
           ElevatedButton(
             onPressed: () {
@@ -98,6 +98,7 @@ class StatsPage extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20))),
           ));
+      historyData.add(SizedBox(height: 15));
 
     }
     return historyData;
