@@ -14,7 +14,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:acne_detector/com/request.dart';
 import 'package:acne_detector/search/searchPage.dart';
 import 'package:acne_detector/search/statsPage.dart';
-import 'package:acne_detector/search/blackheadinfo.dart';
 import 'package:acne_detector/search/resultPage.dart';
 import 'package:acne_detector/pages/login.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -30,6 +29,7 @@ String time = "";
 String acneInput = "";
 ValueNotifier<String> acneSelected = ValueNotifier('');
 final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+Map? historyMapMain = {};
 
 class AcneData {
   String classify;
@@ -99,10 +99,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String? search = "";
+  final TextEditingController _search = TextEditingController();
   bool activeTab = true; // True for Search Page, false for Stats Page
   int activeIndex = 0;
-  final TextEditingController _search = TextEditingController();
-  Map historyMap = {};
 
   Future<void> _initCamera() async {
     // Fetch the available cameras before initializing the app.
@@ -127,8 +126,9 @@ class _MyHomePageState extends State<MyHomePage> {
         //   MaterialPageRoute(builder: (context) => CameraScreen()),);
       });
     } else if (index == 2) {
-      Dialogs.showLoadingDialog(context, _keyLoader);
-      try{
+      Dialogs.showLoadingDialog(
+          context, _keyLoader, "Waiting for Server Response...");
+      try {
         final result = await InternetAddress.lookup('example.com');
         if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
           print('connected');
@@ -137,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
               activeTab = false;
               activeIndex = 1;
               Navigator.of(_keyLoader.currentContext as BuildContext,
-                  rootNavigator: true)
+                      rootNavigator: true)
                   .pop();
               setState(() {});
             });
@@ -160,10 +160,12 @@ class _MyHomePageState extends State<MyHomePage> {
       context,
       MaterialPageRoute(builder: (context) => CameraScreen()),
     );
-
+    activeTab = true; // True for Search Page, false for Stats Page
+    activeIndex = 0;
+    setState(() {});
     // Upload
     if (imagePicked != null) {
-      Dialogs.showLoadingDialog(context, _keyLoader);
+      Dialogs.showLoadingDialog(context, _keyLoader, "Uploading to Server...");
 
       // final FirebaseStorage storage = FirebaseStorage.instance;
       // String fileName = path.basename(imagePicked?.path as String);
@@ -283,37 +285,41 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _loadStats(String data) async {
-    print(data);
-    Map<String, dynamic> oldMap = jsonDecode(data);
-    historyMap = oldMap;
-    // var map = Map.fromEntries(
-    //     oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
-    //
-    // //var dates = new List<String>.empty(growable: true);
-    // Map<String, String> acneTypes = new Map();
+    if (data != "") {
+      Map<String, dynamic> oldMap = jsonDecode(data);
+      historyMapMain = oldMap;
+      print("History main map: $historyMapMain");
+      // var map = Map.fromEntries(
+      //     oldMap.entries.map((me) => MapEntry(me.key, convert(me.value))));
+      //
+      // //var dates = new List<String>.empty(growable: true);
+      // Map<String, String> acneTypes = new Map();
 
-    // for (final k in map.keys) {
-    //   dates.add(k);
-    // }
-    // for (final k in map.values) {
-    //
-    // }
+      // for (final k in map.keys) {
+      //   dates.add(k);
+      // }
+      // for (final k in map.values) {
+      //
+      // }
 
-    // map.forEach((date, v) {
-    //   acneTypes.addAll(v);
-    //   print(date); // DateTime
-    //   acneTypes.forEach((classification, url) {
-    //     print(classification); // Classification
-    //     print(url);
-    //     Image a = Image.network(url,);
-    //     //urlToFile(url);// URL
-    //   });
-    // });
+      // map.forEach((date, v) {
+      //   acneTypes.addAll(v);
+      //   print(date); // DateTime
+      //   acneTypes.forEach((classification, url) {
+      //     print(classification); // Classification
+      //     print(url);
+      //     Image a = Image.network(url,);
+      //     //urlToFile(url);// URL
+      //   });
+      // });
 
-    //
-    // for (final k in dates) {
-    //   print(k);
-    // }
+      //
+      // for (final k in dates) {
+      //   print(k);
+      // }
+    }else{
+      historyMapMain = {};
+    }
   }
 
   @override
@@ -341,7 +347,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: controller,
               ),
               StatsPage(
-                historyMap: historyMap,
+                historyMap: historyMapMain,
                 title: 'Statistics',
                 controller: controller,
               ),
@@ -465,7 +471,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class Dialogs {
   static Future<void> showLoadingDialog(
-      BuildContext context, GlobalKey key) async {
+      BuildContext context, GlobalKey key, String Content) async {
     return showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -489,7 +495,7 @@ class Dialogs {
                           height: 10,
                         ),
                         Text(
-                          "Uploading to Server...",
+                          Content,
                           style: TextStyle(
                               color: ThemeData.estimateBrightnessForColor(
                                           myColor) ==
@@ -542,37 +548,119 @@ class Dialogs {
     );
   }
 
+  static Future<void> showYesDialog(BuildContext context, String Title,
+      String Content, String fullDate) async {
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          Title,
+          style: TextStyle(
+              color: ThemeData.estimateBrightnessForColor(myColor) ==
+                      Brightness.light
+                  ? Colors.black
+                  : Colors.white),
+        ),
+        content: Text(
+          Content,
+          style: TextStyle(
+              color: ThemeData.estimateBrightnessForColor(myColor) ==
+                      Brightness.light
+                  ? Colors.black
+                  : Colors.white),
+        ),
+        backgroundColor: myColor,
+        actions: <Widget>[
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              try {
+                final result = await InternetAddress.lookup('example.com');
+                if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                  print('connected');
+                  await deletePredictions(fullDate);
+                    //deletePredictions(fullDate).then((i) async {
+                    globalHistoryData.remove("$fullDate 1");
+                    globalHistoryData.remove("$fullDate 2");
+                    historyMapMain?.remove(fullDate);
+                    // int count = 0;
+                    // for (var time in historyMapMain!.keys) {
+                    //   count++;
+                    // }
+                    // if(count == 1 && historyMapMain!.containsKey(fullDate)){
+                    //   historyMapMain = {};
+                    // }
+                    updater.value *= -1;
+                  //});
+                }
+              } on SocketException catch (_) {
+                print('not connected');
+                Dialogs.showOkDialog(
+                    context, "No Connection", "Could not connect to internet.");
+              }
+            },
+            child: Text('Yes',
+                style: TextStyle(
+                    color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                        ? Colors.black
+                        : Colors.white)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text('No',
+                style: TextStyle(
+                    color: ThemeData.estimateBrightnessForColor(myColor) ==
+                            Brightness.light
+                        ? Colors.black
+                        : Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   static int val = 0;
   static TextEditingController _acnesearch = TextEditingController();
 
-  static Future<void> showListDialog(BuildContext context, String Title, String firstClassName, String secondClassName, String thirdClassName) async {
+  static Future<void> showListDialog(
+      BuildContext context,
+      String Title,
+      String firstClassName,
+      String secondClassName,
+      String thirdClassName) async {
     return showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(Title, style: TextStyle(
-                  color: ThemeData.estimateBrightnessForColor(myColor) ==
-                      Brightness.light
-                      ? Colors.black
-                      : Colors.white)),
+              title: Text(Title,
+                  style: TextStyle(
+                      color: ThemeData.estimateBrightnessForColor(myColor) ==
+                              Brightness.light
+                          ? Colors.black
+                          : Colors.white)),
               contentPadding: EdgeInsets.zero,
               backgroundColor: myColor,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ListTile(
-                    onTap: (){
+                    onTap: () {
                       setState(() {
                         val = 0;
                       });
                     },
-                    title: Text(firstClassName, style: TextStyle(
-                        color: ThemeData.estimateBrightnessForColor(myColor) ==
-                            Brightness.light
-                            ? Colors.black
-                            : Colors.white)),
+                    title: Text(firstClassName,
+                        style: TextStyle(
+                            color:
+                                ThemeData.estimateBrightnessForColor(myColor) ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white)),
                     leading: Radio(
                       value: 0,
                       groupValue: val,
@@ -584,16 +672,18 @@ class Dialogs {
                     ),
                   ),
                   ListTile(
-                    onTap: (){
+                    onTap: () {
                       setState(() {
                         val = 1;
                       });
                     },
-                    title: Text(secondClassName, style: TextStyle(
-                        color: ThemeData.estimateBrightnessForColor(myColor) ==
-                            Brightness.light
-                            ? Colors.black
-                            : Colors.white)),
+                    title: Text(secondClassName,
+                        style: TextStyle(
+                            color:
+                                ThemeData.estimateBrightnessForColor(myColor) ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white)),
                     leading: Radio(
                       value: 1,
                       groupValue: val,
@@ -605,16 +695,18 @@ class Dialogs {
                     ),
                   ),
                   ListTile(
-                    onTap: (){
+                    onTap: () {
                       setState(() {
                         val = 2;
                       });
                     },
-                    title: Text(thirdClassName, style: TextStyle(
-                        color: ThemeData.estimateBrightnessForColor(myColor) ==
-                            Brightness.light
-                            ? Colors.black
-                            : Colors.white)),
+                    title: Text(thirdClassName,
+                        style: TextStyle(
+                            color:
+                                ThemeData.estimateBrightnessForColor(myColor) ==
+                                        Brightness.light
+                                    ? Colors.black
+                                    : Colors.white)),
                     leading: Radio(
                       value: 2,
                       groupValue: val,
@@ -626,7 +718,7 @@ class Dialogs {
                     ),
                   ),
                   ListTile(
-                    onTap: (){
+                    onTap: () {
                       setState(() {
                         val = 3;
                       });
@@ -668,42 +760,45 @@ class Dialogs {
                   ),
                 ],
               ),
-
               actions: [
+                TextButton(
+                  onPressed: () async {
+                    // Do stuff
+                    if (val == 0) {
+                      acneSelected.value = firstClassName;
+                      //await updatePredictions(time, firstClassName);
+                    } else if (val == 1) {
+                      acneSelected.value = secondClassName;
+                      //await updatePredictions(time, secondClassName);
+                    } else if (val == 2) {
+                      acneSelected.value = thirdClassName;
+                      //await updatePredictions(time, thirdClassName);
+                    } else {
+                      acneSelected.value = acneInput;
+                    }
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Confirm',
+                      style: TextStyle(
+                          color:
+                              ThemeData.estimateBrightnessForColor(myColor) ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white)),
+                ),
                 TextButton(
                   onPressed: () {
                     val = 0;
                     _acnesearch.text = "";
                     Navigator.of(context).pop();
                   },
-                  child: Text('Cancel', style: TextStyle(
-                      color: ThemeData.estimateBrightnessForColor(myColor) ==
-                          Brightness.light
-                          ? Colors.black
-                          : Colors.white)),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    // Do stuff
-                    if(val == 0){
-                      acneSelected.value = firstClassName;
-                      //await updatePredictions(time, firstClassName);
-                    }else if(val == 1){
-                      acneSelected.value  = secondClassName;
-                      //await updatePredictions(time, secondClassName);
-                    }else if(val == 2){
-                      acneSelected.value  = thirdClassName;
-                      //await updatePredictions(time, thirdClassName);
-                    }else{
-                      acneSelected.value = acneInput;
-                    }
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Confirm', style: TextStyle(
-                      color: ThemeData.estimateBrightnessForColor(myColor) ==
-                          Brightness.light
-                          ? Colors.black
-                          : Colors.white)),
+                  child: Text('Cancel',
+                      style: TextStyle(
+                          color:
+                              ThemeData.estimateBrightnessForColor(myColor) ==
+                                      Brightness.light
+                                  ? Colors.black
+                                  : Colors.white)),
                 ),
               ],
             );

@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:acne_detector/search/blackheadinfo.dart';
+import 'package:acne_detector/search/whiteheadinfo.dart';
 import 'package:acne_detector/color/color.dart';
 
 class SearchPage extends StatelessWidget {
@@ -27,7 +28,7 @@ class SearchPage extends StatelessWidget {
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
       heightFactor: 1,
-      child: new SingleChildScrollView(
+      child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
@@ -64,7 +65,14 @@ class SearchPage extends StatelessWidget {
               SizedBox(height: 15),
             if (('whitehead').contains((search as String).toLowerCase()))
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const WhiteheadInfo(title: 'Whitehead')),
+                  );
+                },
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(

@@ -63,6 +63,7 @@ class ResultPage extends StatelessWidget {
                 ),
                 onPressed: () async {
                   await updatePredictions(time, acneSelected.value);
+                  Dialogs.val = 0;
                   Navigator.of(context).pop();
                 },
               )

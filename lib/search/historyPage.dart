@@ -56,71 +56,74 @@ class HistoryPage extends StatelessWidget {
             title: Text(title),
           ),
         ),
-        body: Column(mainAxisAlignment: MainAxisAlignment.start, children: <
-            Widget>[
-          // SizedBox(width: 20),
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
-            // SizedBox(width: 10),
+        body: SingleChildScrollView(
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+              // SizedBox(width: 20),
+              Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    // SizedBox(width: 10),
 
-            Expanded(
-                child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 0.0),
-                    child: Column(children: <Widget>[
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: RichText(
-                          text: TextSpan(
-                            text: "  $month $day $year",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontFamily: "Open Sans",
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 30),
-                      Align(
-                        alignment: Alignment.center,
-                        child: RichText(
-                          text: TextSpan(
-                            text: "Your acne prediction was $acneType.",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18,
-                                fontFamily: "Open Sans",
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                              top: BorderSide(width: 2),
-                            bottom: BorderSide(width: 2),
-                          ),
-                        ),
-                        child: Image.network(acneImageUrl),
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: RichText(
-                          text: TextSpan(
-                            text: "Uploaded at $seconds ",
-                            style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 15,
-                                fontFamily: "Open Sans",
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ])))
-          ])
-        ]));
+                    Expanded(
+                        child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 0.0),
+                            child: Column(children: <Widget>[
+                              SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: "  $month $day $year",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 20,
+                                        fontFamily: "Open Sans",
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 30),
+                              Align(
+                                alignment: Alignment.center,
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: "Your acne prediction was $acneType.",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18,
+                                        fontFamily: "Open Sans",
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 15),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(width: 2),
+                                    bottom: BorderSide(width: 2),
+                                  ),
+                                ),
+                                child: Image.network(acneImageUrl),
+                              ),
+                              SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: "Uploaded at $seconds ",
+                                    style: TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 15,
+                                        fontFamily: "Open Sans",
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            ])))
+                  ])
+            ])));
   }
 }

@@ -96,6 +96,29 @@ Future<String> updatePredictions(String time, String acneType) async {
   }
 }
 
+Future<String> deletePredictions(String time) async {
+  var request = http.MultipartRequest(
+    'POST',
+    //Uri.parse("http://10.0.2.2:8000/model"),
+    //Uri.parse("http://192.168.0.183:8000//server/history"),
+    Uri.parse("http://192.168.0.183:8000/server/remove"),
+    //Uri.parse("http://172.17.48.46:8000/model"),
+  );
+  Map<String, String> headers = {"Content-type": "multipart/form-data"};
+  request.fields['UID'] = UserID as String;
+  request.fields['time'] = time;
+
+  request.headers.addAll(headers);
+  print("request: " + request.toString());
+  var res = await request.send();
+  http.Response response = await http.Response.fromStream(res);
+  if (response.statusCode == 200) {
+    return response.body;
+  } else {
+    throw Exception('Failed to load');
+  }
+}
+
 //
 // Future<String> hello() async {
 //   final response =
