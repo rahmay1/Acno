@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:theme_provider/theme_provider.dart';
 import 'package:acne_detector/search/blackheadinfo.dart';
 import 'package:acne_detector/search/whiteheadinfo.dart';
+import 'package:acne_detector/search/cystinfo.dart';
+import 'package:acne_detector/search/papuleinfo.dart';
+import 'package:acne_detector/search/noduleinfo.dart';
+import 'package:acne_detector/search/pustuleinfo.dart';
 import 'package:acne_detector/color/color.dart';
 
 class SearchPage extends StatelessWidget {
@@ -94,7 +98,14 @@ class SearchPage extends StatelessWidget {
               SizedBox(height: 15),
             if (('cyst').contains((search as String).toLowerCase()))
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const CystInfo(title: 'Cyst')),
+                  );
+                },
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(
@@ -116,7 +127,14 @@ class SearchPage extends StatelessWidget {
               SizedBox(height: 15),
             if (('papule').contains((search as String).toLowerCase()))
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const PapuleInfo(title: 'Papule')),
+                  );
+                },
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(
@@ -138,7 +156,14 @@ class SearchPage extends StatelessWidget {
               SizedBox(height: 15),
             if (('nodule').contains((search as String).toLowerCase()))
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const NoduleInfo(title: 'Nodule')),
+                  );
+                },
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(
@@ -160,7 +185,14 @@ class SearchPage extends StatelessWidget {
               SizedBox(height: 15),
             if (('pustule').contains((search as String).toLowerCase()))
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                        const PustuleInfo(title: 'Pustule')),
+                  );
+                },
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: const Text(

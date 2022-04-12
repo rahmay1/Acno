@@ -348,7 +348,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               StatsPage(
                 historyMap: historyMapMain,
-                title: 'Statistics',
+                title: 'History',
                 controller: controller,
               ),
             ],
@@ -368,7 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.query_stats),
-                  label: 'Stats',
+                  label: 'History',
                 ),
               ],
               onTap: _onItemTapped,
@@ -446,7 +446,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: Text('Statistics'),
+        title: Text('History'),
         actions: <Widget>[
           IconButton(
             icon: Icon(

@@ -3,8 +3,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class BlackheadInfo extends StatelessWidget {
-  const BlackheadInfo({Key? key, required this.title}) : super(key: key);
+class PustuleInfo extends StatelessWidget {
+  const PustuleInfo({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -59,51 +59,7 @@ class BlackheadInfo extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(
                               text:
-                              'A type of acne that are open bumps, which shows up as dark. Are very common and usually affects teenagers and young adults but can still affect adults. They commonly appear on your face, neck, back, chest and arms, and like whiteheads, blackheads are comedones. That means that it gives skin rough texture where blackheads are open comedones.\n\n',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                          TextSpan(
-                              text:
-                              'Possible Causes\n',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text:
-                              'Oily skin, hair follicles, dead skin, hormones, and bacteria.\n\n',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                          TextSpan(
-                              text:
-                              'Possible Nonprescription Medications\n',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(
-                              text:
-                              'Salicylic acid:',
-                              style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.normal, fontStyle: FontStyle.italic)),
-                          TextSpan(
-                              text:
-                              ' It dissolves dead skin cells to prevent your hair follicles from clogging.\n',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                          TextSpan(
-                              text:
-                              'Benzoyl peroxide:',
-                              style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.normal, fontStyle: FontStyle.italic)),
-                          TextSpan(
-                              text:
-                              ' It kills surface bacteria but can cause irritation and dryness to skin.\n',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                          TextSpan(
-                              text:
-                              'Azelaic acid:',
-                              style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.normal, fontStyle: FontStyle.italic)),
-                          TextSpan(
-                              text:
-                              ' It kills microorganisms and reduces swelling.\n',
-                              style: TextStyle(fontWeight: FontWeight.normal)),
-                          TextSpan(
-                              text:
-                              'Retinoids:',
-                              style: TextStyle(decoration: TextDecoration.underline, fontWeight: FontWeight.normal, fontStyle: FontStyle.italic)),
-                          TextSpan(
-                              text:
-                              ' Break up whiteheads as well as blackheads and help to prevent clogged pores.\n\n',
+                              'Acne that is full of a yellowish or white fluid called pus. Typically caused hormonal imbalances or hormonal changes in the body.\n\n',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                           TextSpan(
                               text:
@@ -111,7 +67,7 @@ class BlackheadInfo extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(
                               text:
-                              ' - CeraVe Salicylic Acid Cleanser\n - AHA exfoliator (normal or oily skin)\n - BHA exfoliator (flaky or dull skin)\n - Moisturizer (Dry skin)\n - Moisturizer (Oily skin)\n\n',
+                              ' - CeraVe Salicylic Acid Cleanser\n - BHA exfoliator\n - Moisturizer\n\n',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                           TextSpan(
                               text:
@@ -119,7 +75,7 @@ class BlackheadInfo extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(
                               text:
-                              ' - Wash face with cleanser that contains salicylic acid\n - Gently exfoliate with AHA’s or BHA’s\n - Moisturize your skin\n\n',
+                              ' - Use a mild cleanser\n\n',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                           TextSpan(
                               text:
@@ -127,7 +83,7 @@ class BlackheadInfo extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           TextSpan(
                               text:
-                              ' - Try to avoid scrubs exfoliators\n - When using AHA’s exfoliate make sure to avoid sunlight\n\n',
+                              ' - Use warm water when washing your skin\n - Don\'t irritate skin, avoid rubbing area with towel and pat down when needed\n\n',
                               style: TextStyle(fontWeight: FontWeight.normal)),
                           TextSpan(
                               text:
@@ -155,7 +111,7 @@ class BlackheadInfo extends StatelessWidget {
 
 _launchURL() async {
   const url =
-      'https://my.clevelandclinic.org/health/diseases/22038-blackheads#:~:text=Blackheads%20are%20a%20type%20of,Blackheads%20aren\'t%20pimples.https://www.healthline.com/health/beauty-skin-care/how-to-get-rid-of-blackheads';
+      'https://www.healthline.com/health/pustules';
   if (await canLaunch(url)) {
     print('launch url');
     await launch(url);
